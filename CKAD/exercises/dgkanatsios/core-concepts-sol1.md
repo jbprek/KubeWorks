@@ -3,7 +3,7 @@
 2. Create the pod that was just described using YAML
 3. Create a busybox pod (using kubectl command) that runs the command "env". Run it and see the output
    ~~k run --image busybox -restart=Never --command --env~~ 
-   k run busybox --image busybox --restart=Never -rm -it --command -- env
+   k run busybox --image busybox --restart=Never -rm -it 
 4. Create a busybox pod (using YAML) that runs the command "env". Run it and see the output
 5. Get the YAML for a new namespace called 'myns' without creating it
 6. Get the YAML for a new ResourceQuota called 'myrq' with hard limits of 1 CPU, 1G memory and 2 pods without creating it
