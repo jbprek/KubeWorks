@@ -2,7 +2,8 @@
 1.Task weight: 1%
 
 The DevOps team would like to get the list of all Namespaces in the cluster. Get the list and save it to /opt/course/1/namespaces.
-2Task weight: 3%
+
+2.Task weight: 3%
 
 Create a single Pod of image httpd:2.4.41-alpine in Namespace default. The Pod should be named pod1 and the container should be named pod1-container.
 
