@@ -7,6 +7,7 @@ set paste
 
 source <(kubectl completion bash)
 alias kn='kubectl config set-context --current --namespace '
+alias kgp='kubectl get po -o wide --show-labels'
 export do="--dry-run=client -o yaml"
 export rm="--restart=Never --rm -i"
 export kp="--force --grace-period=0"

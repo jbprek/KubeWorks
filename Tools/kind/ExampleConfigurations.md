@@ -77,6 +77,12 @@ kind create cluster --config  kind-config-2.yaml
 #!/bin/sh
 set -o errexit
 
+mkdir -p /home/john/my-kind/vol0
+mkdir -p /home/john/my-kind/vol1
+mkdir -p /home/john/my-kind/vol2
+mkdir -p /home/john/my-kind/vol3
+mkdir -p /home/john/my-kind/vol4
+
 # create registry container unless it already exists
 reg_name='kind-registry'
 reg_port='5000'

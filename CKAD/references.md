@@ -1,6 +1,7 @@
 # Exam
 - [Linux Foundation Certification Exams: Candidate Handbook](https://docs.linuxfoundation.org/tc-docs/certification/lf-candidate-handbook)
 - [Important Instructions: CKA and CKAD](https://docs.linuxfoundation.org/tc-docs/certification/tips-cka-and-ckad)
+- [1.22 Curriculum](https://github.com/cncf/curriculum/blob/master/CKAD_Curriculum_v1.22.pdf)
 ## Youtube videos
  - [Examp tips](https://www.youtube.com/watch?v=L6K_8dOFR5w)
  - [CKAD VIM tasks](https://www.youtube.com/watch?v=knyJt8d6C_8)
