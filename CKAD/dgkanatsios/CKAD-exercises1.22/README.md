@@ -17,13 +17,7 @@ During the exam, you are allowed to keep only one other browser tab open to refe
 - [Application Environment, Configuration  and  Security 25%](e.application_environ_conf_security.md)
 - [Services & Networking 20%](f.services_networking.md)
 
-- [Core Concepts - 13%](a.core_concepts.md)
-- [Multi-container pods - 10%](b.multi_container_pods.md)
-- [Pod design - 20%](c.pod_design.md)
-- [Configuration - 18%](d.configuration.md)
-- [Observability - 18%](e.observability.md)
-- [Services and networking - 13%](f.services.md)
-- [State persistence - 8%](g.state.md)
+
 
 ### Can I PR? There is an error/an alternative way/an extra question/solution I can offer
 
