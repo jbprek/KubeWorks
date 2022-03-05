@@ -82,6 +82,8 @@ kubectl run nginx --image=nginx --restart=Never --dry-run=client -o yaml | kubec
 
 ```bash
 kubectl run busybox --image=busybox --command --restart=Never -it -- env # -it will help in seeing the output
+# or to have the pod removed automaticaly use the --rm option
+kubectl run busybox --image busybox --restart=Never --rm -it -- env
 # or, just run it without -it
 kubectl run busybox --image=busybox --command --restart=Never -- env
 # and then, check its logs
