@@ -301,6 +301,20 @@ status: {}
 
 kubernetes.io > Documentation > Tasks > Configure Pods and Containers > [Assign CPU Resources to Containers and Pods](https://kubernetes.io/docs/tasks/configure-pod-container/assign-cpu-resource/)
 
+
+### Get the YAML for a new ResourceQuota called 'myrq' with hard limits of 1 CPU, 1G memory and 2 pods without creating it
+
+<details><summary>show</summary>
+<p>
+
+```bash
+kubectl create quota myrq --hard=cpu=1,memory=1G,pods=2 --dry-run=client -o yaml
+```
+
+</p>
+</details>
+
+
 ### Create an nginx pod with requests cpu=100m,memory=256Mi and limits cpu=200m,memory=512Mi
 
 <details><summary>show</summary>

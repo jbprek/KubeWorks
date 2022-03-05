@@ -67,6 +67,9 @@ Alternatively, you can run in one line
 
 ```bash
 kubectl run nginx --image=nginx --restart=Never --dry-run=client -o yaml | kubectl create -n mynamespace -f -
+# OR (namespace not needed since it's included in yaml)
+kubectl run nginx --image=nginx --restart=Never --dry-run=client -o yaml | kubectl apply -f -
+
 ```
 
 </p>
@@ -136,18 +139,6 @@ kubectl logs busybox
 
 ```bash
 kubectl create namespace myns -o yaml --dry-run=client
-```
-
-</p>
-</details>
-
-### Get the YAML for a new ResourceQuota called 'myrq' with hard limits of 1 CPU, 1G memory and 2 pods without creating it
-
-<details><summary>show</summary>
-<p>
-
-```bash
-kubectl create quota myrq --hard=cpu=1,memory=1G,pods=2 --dry-run=client -o yaml
 ```
 
 </p>

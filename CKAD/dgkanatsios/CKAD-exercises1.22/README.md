@@ -10,7 +10,7 @@ During the exam, you are allowed to keep only one other browser tab open to refe
 
 ## Contents
 
-- [Core Concepts - 13%](a.core_concepts.md)
+- [Core Concepts - 0%](a.core_concepts.md)
 - [Application Design  and  Build 20%](b.application_design_and_build.md)
 - [Application Deployment 20 %](c.application_deployment_and_build.md)
 - [Application observability  and maintenance 15%](d.application_observability_and_maintenance.md)

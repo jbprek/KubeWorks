@@ -1,5 +1,6 @@
 #Application  Deployment 20 %
 ## TODO Blue/Green canary
+- [Harness Article](https://harness.io/blog/blue-green-canary-deployment-strategies/)
 ## Deployments
 
 kubernetes.io > Documentation > Concepts > Workloads > Controllers > [Deployments](https://kubernetes.io/docs/concepts/workloads/controllers/deployment)
