@@ -4,6 +4,7 @@
 
 ````yaml
 # kind-config.yaml
+cat EOF << > 
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
 nodes:
@@ -67,6 +68,8 @@ nodes:
       containerPath: /vol3
     - hostPath: /home/john/my-kind/vol4
       containerPath: /vol4
+    - hostPath: /home/john/my-kind/vol5
+      containerPath: /vol5
 EOF
     
 kind create cluster --config  kind-config-2.yaml 

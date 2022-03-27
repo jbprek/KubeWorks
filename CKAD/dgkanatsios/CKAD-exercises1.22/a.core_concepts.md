@@ -11,6 +11,33 @@ kubernetes.io > Documentation > Tasks > Access Applications in a Cluster > [Acce
 
 kubernetes.io > Documentation > Tasks > Access Applications in a Cluster > [Use Port Forwarding to Access Applications in a Cluster](https://kubernetes.io/docs/tasks/access-application-cluster/port-forward-access-application-cluster/)
 
+
+### Create a namespace called 'dummy' 
+
+<details><summary>show</summary>
+<p>
+```bash
+kubectl create namespace dummy
+```
+</p>
+</details>
+
+
+### Set 'dummy' as working namespace in context, verify that is the one in use, then set back to default
+
+
+<details><summary>show</summary>
+<p>
+```bash
+kubectl config set-context --current --namespace=dummy
+kubectl config view | grep namespace
+kubectl config set-context --current --namespace=defaultmysql
+```
+</p>
+</details>
+
+
+
 ### Create a namespace called 'mynamespace' and a pod with image nginx called nginx on this namespace
 
 <details><summary>show</summary>

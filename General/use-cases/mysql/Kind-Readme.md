@@ -36,11 +36,11 @@ nodes:
 ````
 ## Create PV, PVC
 ````bash
-cat << EOF > oracle-pv.yaml
+cat << EOF > mysql-pv.yaml
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: ora-pv
+  name: mysql-pv
   labels:
     type: local
 spec:
@@ -55,7 +55,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: ora-pvc
+  name: mysql-pvc
 spec:
   storageClassName: manual
   accessModes:
@@ -65,7 +65,7 @@ spec:
       storage: 20Gi
 EOF
 
-kubectl apply -f oracle-pv.yaml
+kubectl apply -f mysql-pv.yaml
 ````
 
 ## Create MySQL service
@@ -117,7 +117,7 @@ spec:
       volumes:
       - name: mysql-persistent-storage
         persistentVolumeClaim:
-          claimName: ora-pvc
+          claimName: mysql-pvc
 
 EOF
 
@@ -127,6 +127,6 @@ kubectl apply -f mysql-svc.yaml
 ````bash
 kubectl delete svc mysql  
 kubectl delete deploy mysql
-kubectl delete pvc ora-pvc
-kubectl delete pv ora-pv
+kubectl delete pvc mysql-pvc
+kubectl delete pv mysql-pv
 ````
