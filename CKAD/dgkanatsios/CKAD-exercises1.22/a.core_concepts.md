@@ -1,6 +1,7 @@
 ![](https://gaforgithub.azurewebsites.net/api?repo=CKAD-exercises/core_concepts&empty)
 # Core Concepts (13%)
 
+
 kubernetes.io > Documentation > Reference > kubectl CLI > [kubectl Cheat Sheet](https://kubernetes.io/docs/reference/kubectl/cheatsheet/)
 
 kubernetes.io > Documentation > Tasks > Monitoring, Logging, and Debugging > [Get a Shell to a Running Container](https://kubernetes.io/docs/tasks/debug-application-cluster/get-shell-running-container/)
@@ -377,6 +378,20 @@ kubectl exec -it nginx -- sh -c 'echo $var1'
 kubectl describe po nginx | grep val1
 # or
 kubectl run nginx --restart=Never --image=nginx --env=var1=val1 -it --rm -- env
+```
+
+</p>
+</details>
+
+### Create an long running ubuntu instance, to be used as debug pod, connect using bahs in the instance
+
+<details><summary>show</summary>
+<p>
+
+```bash
+kubectl run ubuntu --image=ubuntu --command -- /bin/sleep 365d
+# then
+kubectl exec -it ubuntu -- /bin/bash
 ```
 
 </p>

@@ -223,6 +223,57 @@ cat var8 # will show val8
 </p>
 </details>
 
+
+### CKAD -Question 15 | ConfigMap, Configmap-Volume
+Team Moonpie has a nginx server Deployment called web-moon in Namespace moon. Someone started configuring it but it was never completed. To complete please create a ConfigMap called configmap-web-moon-html containing the content of file /opt/course/15/web-moon.html under the data key-name index.html.
+
+The Deployment web-moon is already configured to work with this ConfigMap and serve its content. Test the nginx configuration for example using curl from a temporary nginx:alpine Pod.
+<details><summary>show</summary>
+<p>
+
+```bash
+kubectl create configmap cmvolume --from-literal=var8=val8 --from-literal=var9=val9
+kubectl run nginx --image=nginx --restart=Never -o yaml --dry-run=client > pod.yaml
+vi pod.yaml
+```
+
+```YAML
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: nginx
+  name: nginx
+spec:
+  volumes: # add a volumes list
+  - name: myvolume # just a name, you'll reference this in the pods
+    configMap:
+      name: cmvolume # name of your configmap
+  containers:
+  - image: nginx
+    imagePullPolicy: IfNotPresent
+    name: nginx
+    resources: {}
+    volumeMounts: # your volume mounts are listed here
+    - name: myvolume # the name that you specified in pod.spec.volumes.name
+      mountPath: /etc/lala # the path inside your container
+  dnsPolicy: ClusterFirst
+  restartPolicy: Never
+status: {}
+```
+
+```bash
+kubectl create -f pod.yaml
+kubectl exec -it nginx -- /bin/sh
+cd /etc/lala
+ls # will show var8 var9
+cat var8 # will show val8
+```
+
+</p>
+</details>
+
 ## SecurityContext
 
 kubernetes.io > Documentation > Tasks > Configure Pods and Containers > [Configure a Security Context for a Pod or Container](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
