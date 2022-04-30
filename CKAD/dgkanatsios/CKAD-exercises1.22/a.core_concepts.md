@@ -1,5 +1,5 @@
 ![](https://gaforgithub.azurewebsites.net/api?repo=CKAD-exercises/core_concepts&empty)
-# Core Concepts (13%)
+# Core Concepts (0)
 
 
 kubernetes.io > Documentation > Reference > kubectl CLI > [kubectl Cheat Sheet](https://kubernetes.io/docs/reference/kubectl/cheatsheet/)

@@ -1,4 +1,4 @@
-```bash
+s```bash
 vi .vimrc
 
 set ts=2
