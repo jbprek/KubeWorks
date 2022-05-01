@@ -12,41 +12,142 @@ kubernetes.io > Documentation > Tasks > Access Applications in a Cluster > [Acce
 
 kubernetes.io > Documentation > Tasks > Access Applications in a Cluster > [Use Port Forwarding to Access Applications in a Cluster](https://kubernetes.io/docs/tasks/access-application-cluster/port-forward-access-application-cluster/)
 
+## Namespaces
+
+### CKAD 1% List all namespaces - store then in a file
+<details><summary>show</summary>
+<p>
+
+```bash
+kubectl get ns | cut -d " " -f1 > allns.txt
+```
+</p>
+</details>
 
 ### Create a namespace called 'dummy' 
 
 <details><summary>show</summary>
 <p>
 ```bash
-kubectl create namespace dummy
+kubectl create ns dummy
 ```
 </p>
 </details>
-
 
 ### Set 'dummy' as working namespace in context, verify that is the one in use, then set back to default
 
 
 <details><summary>show</summary>
 <p>
+
 ```bash
 kubectl config set-context --current --namespace=dummy
 kubectl config view | grep namespace
-kubectl config set-context --current --namespace=defaultmysql
+kubectl config set-context --current --namespace=default
 ```
 </p>
 </details>
 
 
-
-### Create a namespace called 'mynamespace' and a pod with image nginx called nginx on this namespace
+### Get pods on all namespaces
 
 <details><summary>show</summary>
 <p>
 
 ```bash
-kubectl create namespace mynamespace
-kubectl run nginx --image=nginx --restart=Never -n mynamespace
+kubectl get po --all-namespaces
+```
+Alternatively
+
+```bash
+kubectl get po -A
+```
+</p>
+</details>
+
+### Get the YAML for a new namespace called 'myns' without creating it
+
+<details><summary>show</summary>
+<p>
+
+```bash
+kubectl create namespace myns -o yaml --dry-run=client
+```
+
+</p>
+</details>
+
+## Pods 
+### CKAD 2% Pods Namespaces
+1. Create a single Pod of image httpd:2.4.41-alpine in Namespace default. The Pod should be named pod1 and the container should be named pod1-container.
+
+2. Your manager would like to run a command manually on occasion to output the status of that exact Pod. Please write a command that does this into ~/dummy/pod1-status-command.sh. The command should use kubectl.
+
+<details><summary>show</summary>
+<p>
+
+```bash
+# 1.1
+kubectl run pod1 --image=httpd:2.4.41-alpine -n default $do > pod1.yml
+# 1.2  edit containers[0].name to pod1-container
+vi pod1.yml 
+# 2
+cat << EOF > ~/dummy/pod1-status-command.sh
+kubect -n default get po -o jsonpath="{.status.phase}"
+EOF 
+
+```
+</p>
+</details>
+
+### CKAD 4% Pods Namespaces
+The board of Team Neptune decided to take over control of one e-commerce webserver from Team Saturn. The administrator who once setup this webserver is not part of the organisation any longer. All information you could get was that the e-commerce system is called my-happy-shop.
+
+Search for the correct Pod in Namespace saturn and move it to Namespace neptune. It doesn't matter if you shut it down and spin it up again, it probably hasn't any customers anyways.
+
+#### Setup
+```bash
+kubectl create namespace saturn
+kubectl -n saturn run web1 --image=nginx 
+kubectl -n saturn run web2 --image=nginx 
+kubectl -n saturn run web3 --image=nginx 
+kubectl -n saturn label pods web2 system=my-happy-shop
+
+kubectl create namespace neptune
+
+```
+
+<details><summary>show</summary>
+<p>
+
+
+```bash
+#1 Find in saturn the specific pod
+kubectl -n saturn describe pods | grep my-happy-shop -C20
+# must be web2
+# get yaml
+kubectl -n saturn get po web2 -o yaml > web2.yml
+# Edit file remove all sections beyond metadata and spec
+# Start pod
+kubectl -n neptune apply -f web2.yml
+# Check if it is running
+kubectl -n neptune get po web2
+#Delete pod from saturn
+kubectl -n saturn delete po web2
+
+```
+
+</p>
+</details>
+
+### Create a namespace called 'ns1' and a pod with image nginx called nginx on this namespace
+
+<details><summary>show</summary>
+<p>
+
+```bash
+kubectl create namespace ns1
+kubectl run nginx --image=nginx --restart=Never -n ns1
 ```
 
 </p>
@@ -60,7 +161,7 @@ kubectl run nginx --image=nginx --restart=Never -n mynamespace
 Easily generate YAML with:
 
 ```bash
-kubectl run nginx --image=nginx --restart=Never --dry-run=client -n mynamespace -o yaml > pod.yaml
+kubectl run nginx --image=nginx --restart=Never --dry-run=client -n ns1 -o yaml > pod.yaml
 ```
 
 ```bash
@@ -75,7 +176,7 @@ metadata:
   labels:
     run: nginx
   name: nginx
-  namespace: mynamespace
+  namespace: ns1
 spec:
   containers:
   - image: nginx
@@ -94,7 +195,7 @@ kubectl create -f pod.yaml
 Alternatively, you can run in one line
 
 ```bash
-kubectl run nginx --image=nginx --restart=Never --dry-run=client -o yaml | kubectl create -n mynamespace -f -
+kubectl run nginx --image=nginx --restart=Never --dry-run=client -o yaml | kubectl create -n ns1 -f -
 # OR (namespace not needed since it's included in yaml)
 kubectl run nginx --image=nginx --restart=Never --dry-run=client -o yaml | kubectl apply -f -
 
@@ -116,6 +217,9 @@ kubectl run busybox --image busybox --restart=Never --rm -it -- env
 kubectl run busybox --image=busybox --command --restart=Never -- env
 # and then, check its logs
 kubectl logs busybox
+
+#EXAM Prefered using env var
+kubectl run busybox --image=busybox $rm -- env
 ```
 
 </p>
@@ -162,33 +266,6 @@ kubectl logs busybox
 </p>
 </details>
 
-### Get the YAML for a new namespace called 'myns' without creating it
-
-<details><summary>show</summary>
-<p>
-
-```bash
-kubectl create namespace myns -o yaml --dry-run=client
-```
-
-</p>
-</details>
-
-### Get pods on all namespaces
-
-<details><summary>show</summary>
-<p>
-
-```bash
-kubectl get po --all-namespaces
-```
-Alternatively 
-
-```bash
-kubectl get po -A
-```
-</p>
-</details>
 
 ### Create a pod with image nginx called nginx and expose traffic on port 80
 
@@ -212,7 +289,7 @@ kubectl run nginx --image=nginx --restart=Never --port=80
 ```bash
 # kubectl set image POD/POD_NAME CONTAINER_NAME=IMAGE_NAME:TAG
 kubectl set image pod/nginx nginx=nginx:1.7.1
-kubectl describe po nginx # you will see an event 'Container will be killed and recreated'
+kubectl describe po nginx # you will see an event 'Container nginx definition changed, will be restarted'
 kubectl get po nginx -w # watch it
 ```
 

@@ -19,12 +19,7 @@
 ## Question 19 | Service ClusterIP->NodePort Task weight: 3% -
 ## Question 20 | NetworkPolicy Task weight: 9%
 ## Question 21 | Requests and Limits, ServiceAccount Task weight: 4%
+## Question 22 | Labels Annotattions: 3%
 
 
-
-
-Create a single Pod of image httpd:2.4.41-alpine in Namespace default. The Pod should be named pod1 and the container should be named pod1-container.
-
-Your manager would like to run a command manually on occasion to output the status of that exact Pod. Please write a command that does this into /opt/course/2/pod1-status-command.sh. The command should use kubectl.
-
-
+    
