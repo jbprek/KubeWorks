@@ -6,13 +6,13 @@
 
 kubernetes.io > Documentation > Tasks > Configure Pods and Containers > [Configure a Pod to Use a ConfigMap](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/)
 
-### Create a configmap named config with values foo=lala,foo2=lolo
+### Create a configmap named conf_from_lit with values foo=lala,foo2=lolo
 
 <details><summary>show</summary>
 <p>
 
 ```bash
-kubectl create configmap config --from-literal=foo=lala --from-literal=foo2=lolo
+kubectl create cm conf-from-lit --from-literal=foo=lala --from-literal=foo2=lolo
 ```
 
 </p>
@@ -24,34 +24,36 @@ kubectl create configmap config --from-literal=foo=lala --from-literal=foo2=lolo
 <p>
 
 ```bash
-kubectl get cm config -o yaml
+kubectl get cm conf-from-lit -o yaml
 # or
-kubectl describe cm config
+kubectl describe conf-from-lit config1
 ```
 
 </p>
 </details>
 
-### Create and display a configmap from a file
+### Create and display a configmap conf-from-file from a file
 
 Create the file with
 
 ```bash
-echo -e "foo3=lili\nfoo4=lele" > config.txt
+echo -e "foo3=lili\nfoo4=lele" > config2.txt
 ```
 
 <details><summary>show</summary>
 <p>
 
 ```bash
-kubectl create cm configmap2 --from-file=config.txt
-kubectl get cm configmap2 -o yaml
+kubectl create cm conf-from-file --from-file=config2.txt
+kubectl get cm conf-from-file -o yaml
 ```
 
 </p>
 </details>
 
-### Create and display a configmap from a .env file
+### Create and display a configmap named cm conf-from-env-file from a .env file
+
+Note: Substitute for --from-literal
 
 Create the file with the command
 
@@ -63,43 +65,47 @@ echo -e "var1=val1\n# this is a comment\n\nvar2=val2\n#anothercomment" > config.
 <p>
 
 ```bash
-kubectl create cm configmap3 --from-env-file=config.env
-kubectl get cm configmap3 -o yaml
+kubectl create cm conf-from-env-file --from-env-file=config.env
+kubectl describe cm conf-from-env-file
+kubectl get cm conf-from-env-file -o yaml
 ```
 
 </p>
 </details>
 
-### Create and display a configmap from a file, giving the key 'special'
+### Create and display a configmap named conf-from-file-key  from a file, giving the key 'special'
 
 Create the file with
 
 ```bash
-echo -e "var3=val3\nvar4=val4" > config4.txt
+echo -e "var3=val3\nvar4=val4" > conf-from-file-key.txt
 ```
 
 <details><summary>show</summary>
 <p>
 
 ```bash
-kubectl create cm configmap4 --from-file=special=config4.txt
-kubectl describe cm configmap4
-kubectl get cm configmap4 -o yaml
+kubectl create cm conf-from-file-key --from-file=special=conf-from-file-key.txt
+kubectl describe cm conf-from-file-key
+kubectl get cm conf-from-file-key -o yaml
 ```
 
 </p>
 </details>
 
-### Create a configMap called 'options' with the value var5=val5. Create a new nginx pod that loads the value from variable 'var5' in an env variable called 'option'
+###  Create a new nginx pod that loads the value from variable 'var2', from conf-from-env-file  in an env variable called 'VAR2'
 
 <details><summary>show</summary>
 <p>
 
+[Solution temlate from docs](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#define-a-container-environment-variable-with-data-from-a-single-configmap) 
+
 ```bash
-kubectl create cm options --from-literal=var5=val5
-kubectl run nginx --image=nginx --restart=Never --dry-run=client -o yaml > pod.yaml
-vi pod.yaml
+kubectl run nginx1 --image=nginx $do > nginx1.yml
+vi nginx1.yaml
 ```
+
+Edit generated pod.yaml
 
 ```YAML
 apiVersion: v1
@@ -111,37 +117,40 @@ metadata:
   name: nginx
 spec:
   containers:
-  - image: nginx
-    imagePullPolicy: IfNotPresent
-    name: nginx
-    resources: {}
-    env:
-    - name: option # name of the env variable
-      valueFrom:
-        configMapKeyRef:
-          name: options # name of config map
-          key: var5 # name of the entity in config map
+    - image: nginx
+      name: nginx
+      env:
+        # Define the environment variable
+        - name: option
+          valueFrom:
+            configMapKeyRef:
+              # The ConfigMap containing the value you want to assign to SPECIAL_LEVEL_KEY
+              name: config3
+              # Specify the key associated with the value
+              key: var2
+      resources: {}
   dnsPolicy: ClusterFirst
-  restartPolicy: Never
+  restartPolicy: Always
 status: {}
+
 ```
 
 ```bash
-kubectl create -f pod.yaml
-kubectl exec -it nginx -- env | grep option # will show 'option=val5'
+kubectl create -f nginx1.yaml
+kubectl exec -t nginx1 -- env | grep VAR2 # will show 'VAR2=val2'
 ```
 
 </p>
 </details>
 
-### Create a configMap 'anotherone' with values 'var6=val6', 'var7=val7'. Load this configMap as env variables into a new nginx pod
-
+###  Load conf-from-env-file CM as env variables into a new nginx pod named nginx2
 <details><summary>show</summary>
 <p>
 
+Note effective diff from the previous is that all key-value pairs will be mapped to the env.
+
 ```bash
-kubectl create configmap anotherone --from-literal=var6=val6 --from-literal=var7=val7
-kubectl run --restart=Never nginx --image=nginx -o yaml --dry-run=client > pod.yaml
+kubectl run  nginx2 --image=nginx $do > nginx2.yaml
 vi pod.yaml
 ```
 
@@ -151,8 +160,8 @@ kind: Pod
 metadata:
   creationTimestamp: null
   labels:
-    run: nginx
-  name: nginx
+    run: nginx2
+  name: nginx2
 spec:
   containers:
   - image: nginx
@@ -161,15 +170,15 @@ spec:
     resources: {}
     envFrom: # different than previous one, that was 'env'
     - configMapRef: # different from the previous one, was 'configMapKeyRef'
-        name: anotherone # the name of the config map
+        name: conf-from-env-file # the name of the config map
   dnsPolicy: ClusterFirst
   restartPolicy: Never
 status: {}
 ```
 
 ```bash
-kubectl create -f pod.yaml
-kubectl exec -it nginx -- env 
+kubectl create -f nginx2.yaml
+kubectl exec -t nginx2 -- env 
 ```
 
 </p>
