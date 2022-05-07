@@ -233,6 +233,79 @@ cat var8 # will show val8
 </details>
 
 
+
+### Mount a page in nginx
+- Mount an HTML page under a specific URL (/page.html) on a Nginx Pod named nginx3 using CM
+- Contents of somepage.html
+```bash
+
+cat << EOF > somepage.html
+<!doctype html>
+<html>
+<head>
+    <title>Loaded from Config Map</title>
+</head>
+<body>
+<p>This is an example paragraph. Anything in the <strong>body</strong> tag will appear on the page, just like this <strong>p</strong> tag and its contents.</p>
+</body>
+</html>
+EOF
+```
+
+Make this page to be available under http://<url>/page.html of an nginx pod
+
+
+Create a configMap 'web-page-cm' with th e.
+
+<details><summary>show</summary>
+<p>
+
+```bash
+kubectl create cm page-cm --from-file=page.html=somepage.html
+kubectl run nginx3 --image=nginx $do > nginx3.yaml
+vi nginx3.yaml
+```
+
+```YAML
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: nginx3
+  name: nginx3
+spec:
+
+  volumes:
+    - name: config-volume
+      configMap:
+        # Provide the name of the ConfigMap containing the files you want
+        # to add to the container
+        name: page-cm
+  containers:
+    - image: nginx
+      name: nginx3
+      resources: {}
+      volumeMounts:
+        - name: config-volume
+          mountPath: /usr/share/nginx/html
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+status: {}
+```
+
+```bash
+kubectl create -f pod.yaml
+kubectl exec -it nginx -- /bin/sh
+cd /etc/lala
+ls # will show var8 var9
+cat var8 # will show val8
+```
+
+</p>
+</details>
+
+
 ### CKAD -Question 15 | ConfigMap, Configmap-Volume
 Team Moonpie has a nginx server Deployment called web-moon in Namespace moon. Someone started configuring it but it was never completed. To complete please create a ConfigMap called configmap-web-moon-html containing the content of file /opt/course/15/web-moon.html under the data key-name index.html.
 
