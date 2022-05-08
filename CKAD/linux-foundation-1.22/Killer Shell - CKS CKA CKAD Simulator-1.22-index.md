@@ -20,6 +20,3 @@
 ## Question 20 | NetworkPolicy Task weight: 9%
 ## Question 21 | Requests and Limits, ServiceAccount Task weight: 4%
 ## Question 22 | Labels Annotattions: 3%
-
-
-    

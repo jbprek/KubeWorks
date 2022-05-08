@@ -5,6 +5,167 @@
 - Understand Jobs and CronJobs
 - Understand  multi-container  Pod  design patterns (e.g. sidecar, init and others)
 - Utilize  persistent  and  ephemeral  volumes
+
+## CKAD exam ex
+
+Question 11 | Working with Containers Task weight: 7%
+
+Question 3 | Job Task weight: 2%
+Question 16 | Logging sidecar Task weight: 6%
+Question 17 | InitContainer Task weight: 4%
+Question 22 | Labels Annotations: 3%
+
+Question 12 | Storage, PV, PVC, Pod volume Task weight: 8%
+Question 13 | Storage, StorageClass, PVC  Task weight: 6%
+
+
+## Define, build and modify container images
+### Run httpd detached container, mount volume with html content
+- Before : Run the following commands
+````bash
+# Setup a webpage
+mkdir -p ~/dummy/webfiles
+echo "Hello From Docker!" > ~/dummy/webfiles/index.html
+ ````
+
+1. Create a container in detached mode
+   1. Using image httpd:latest
+   2. Expose port 80 on 8080
+   3. Name it my-apache
+   4. mount /dummy/webfiles to /usr/local/apache2/htdocs/
+2. Verify that the container is running properly by accessing home page
+3. Attach to the container inspect the filesystem
+4. Cleanup
+
+<details><summary>show</summary>
+<p>
+
+````bash
+# 1. Run the container
+docker run -d --name=my-apache -p 8080:80 -v /home/john/dummy/webfiles:/usr/local/apache2/htdocs/ httpd:latest
+#2. Verify that the container is running properly by accessing home page
+curl localhost:8080
+#3. Attach to the container inspect the filesystem
+docker exec -it my-apache /bin/sh
+# 4. Cleanup
+docker stop my-apache
+docker rm my-apache
+rm -rf ~/dummy/webfiles
+ ````
+
+</p>
+</details>
+
+### Create container connect interactively (GVS)
+1. Run the latest version of Ubuntu in container in interactive mode starting a bash shell and explore the/etc/os-release file as well the kernel version uname -r
+2. Disconnect from the container without shutting it down (Detach)
+3. Reconnect to the shell created in (1)
+4. Create a new shell connecting to the container using exec, exit from the shell
+5. Terminate container using command in shell(3)
+6. Cleanup
+<details><summary>show</summary>
+<p>
+
+Remember **Ctrl+P + Ctrl+Q** sequence
+````bash
+# 1. Run the container
+docker run -it --name=ubuntu ubuntu
+# wait prompt to appear then you may issue any command
+# 2. Press Ctrl+P + Ctrl+Q
+# 3. Reconnect to the shell created in (1)
+docker attach ubuntu
+# wait prompt to appear
+# 4. Create a new shell connecting to the container using exec, exit from the shell
+# In Another Term
+docker exec -it ubuntu bash
+# run ps or who and we can see 2 sessions
+# run exit or Ctlr-D on the prompt
+# 5. Terminate container using command in shell(3)
+# Switch to term (3) run exit or Ctlr-D on the prompt
+# 6. Cleanup
+docker rm ubuntu
+ ````
+</p>
+</details>
+
+### Container inspection
+ Run a container in detached mode using image nginx find it's IP address
+
+<details><summary>show</summary>
+<p>
+
+````bash
+# Run container
+docker run -d nginx
+# Find container id
+docker ps
+#Output
+# CONTAINER ID   IMAGE     COMMAND                  CREATED         STATUS         PORTS     NAMES
+# b31c87385e0a   nginx     "/docker-entrypoint.…"   4 minutes ago   Up 4 minutes   80/tcp    competent_gauss
+
+docker inspect b31c87385e0a --format=="{{.NetworkSettings.IPAddress}}"
+#  Easier
+docker inspect b31c87385e0a | grep IPAddress
+````
+</p>
+</details>
+
+### Run Container using environment variable check logs
+
+Issue the following command and inspect and fix the problem
+
+docker run --name=mydb  -d mariadb
+
+<details><summary>show</summary>
+<p>
+
+````bash
+ docker run --name=mydb  -d mariadb
+ # Docker ps shows that the container is not running
+ docker ps
+ # Inspect the logs
+ docker logs mydb
+ # Output 
+  docker logs mydb
+2022-05-07 12:47:12+00:00 [Note] [Entrypoint]: Entrypoint script for MariaDB Server 1:10.7.3+maria~focal started.
+2022-05-07 12:47:12+00:00 [Note] [Entrypoint]: Switching to dedicated user 'mysql'
+2022-05-07 12:47:12+00:00 [Note] [Entrypoint]: Entrypoint script for MariaDB Server 1:10.7.3+maria~focal started.
+2022-05-07 12:47:12+00:00 [ERROR] [Entrypoint]: Database is uninitialized and password option is not specified
+        You need to specify one of MARIADB_ROOT_PASSWORD, MARIADB_ALLOW_EMPTY_ROOT_PASSWORD and MARIADB_RANDOM_ROOT_PASSWORD
+        
+# Remove the existing container
+docker rm mydb 
+# Issue the right command
+docker run --name=mydb  -d -e MARIADB_ROOT_PASSWORD=changeme mariadb     
+````
+</p>
+</details>
+
+## Labels and annotations
+kubernetes.io > Documentation > Concepts > Overview > [Labels and Selectors](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#label-selectors)
+
+### Create 3 pods with names nginx1,nginx2,nginx3. All of them should have the label app=v1
+
+<details><summary>show</summary>
+<p>
+
+```bash
+kubectl run nginx1 --image=nginx --restart=Never --labels=app=v1
+kubectl run nginx2 --image=nginx --restart=Never --labels=app=v1
+kubectl run nginx3 --image=nginx --restart=Never --labels=app=v1
+# or
+for i in `seq 1 3`; do kubectl run nginx$i --image=nginx -l app=v1 ; done
+```
+
+</p>
+</details>
+
+
+### Create container connect interactively (GVS)
+- Run the latest version of Fedora in container
+- In interactive mode start a bash shell and explore the/etc/os-release file as well the kernel version uname -r
+- Disconnect from the container without shutting it down
+
 ## Pod design - Labels and annotations
 kubernetes.io > Documentation > Concepts > Overview > [Labels and Selectors](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#label-selectors)
 
@@ -23,6 +184,8 @@ for i in `seq 1 3`; do kubectl run nginx$i --image=nginx -l app=v1 ; done
 
 </p>
 </details>
+
+## Labels & Annotations
 
 ### Show all labels of the pods
 
