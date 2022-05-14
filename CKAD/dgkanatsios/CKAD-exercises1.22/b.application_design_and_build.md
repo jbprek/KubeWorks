@@ -874,7 +874,16 @@ kubectl get pv
 </p>
 </details>
 
-### Create a PersistentVolumeClaim for this storage class, called 'mypvc', a request of 4Gi and an accessMode of ReadWriteOnce, with the storageClassName of normal, and save it on pvc.yaml. Create it on the cluster. Show the PersistentVolumeClaims of the cluster. Show the PersistentVolumes of the cluster
+### PersistentVolumeClaim
+
+Create a PersistentVolumeClaim for this storage class:
+1. called 'mypvc', 
+2. a request of 200Mi and an 
+3. accessMode of ReadWriteOnce
+4. storageClassName of normal, and 
+5. save it on pvc.yaml. 
+6. Create it on the cluster. 
+7. Show the PersistentVolumeClaims of the cluster. Show the PersistentVolumes of the cluster
 
 <details><summary>show</summary>
 <p>
