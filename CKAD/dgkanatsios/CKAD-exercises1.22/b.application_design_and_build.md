@@ -543,8 +543,9 @@ status: {}
 
 ## <a name="mcp">Multi-container Pods</a>
 
+Exercises in ns mcp dir ~/mcp
 
-### Create a Pod with two containers, both with image busybox and command "echo hello; sleep 3600". Connect to the second container and run 'ls'
+### 1. Create a Pod with two containers, both with image busybox and command "echo hello; sleep 3600". Connect to the second container and run 'ls'
 
 <details><summary>show</summary>
 <p>
@@ -593,7 +594,7 @@ kubectl delete po busybox
 </p>
 </details>
 
-### Init Container 
+### 2. Init Container 
 Create pod with :
 - nginx container exposed at port 80. 
 - Add a busybox init container which downloads a page using "wget -O /work-dir/index.html http://neverssl.com/online". 
@@ -693,8 +694,9 @@ kubectl delete po box
 </details>
 
 
-### CKAD Question 16 | Logging sidecar 6%
+### 3. CKAD Question 16 | Logging sidecar 6%
 
+In namespace mcp
 The Tech Lead of Mercury2D decided its time for more logging, to finally fight all these missing data incidents. There is an existing container named cleaner-con in Deployment cleaner in Namespace mercury. This container mounts a volume and writes logs into a file called cleaner.log.
 
 The yaml for the existing Deployment is available at /opt/course/16/cleaner.yaml. Persist your changes at /opt/course/16/cleaner-new.yaml but also make sure the Deployment is running.
