@@ -823,91 +823,22 @@ kubectl -n mercury logs cleaner-799bf8b767-24r6z -c logger-con
 </p>
 </details>
 
-
-
-
-
-## <a name="per">Define volumes</a>
+## <a name="per">Utilize  persistent  and  ephemeral  volumes</a>
 kubernetes.io > Documentation > Tasks > Configure Pods and Containers > [Configure a Pod to Use a Volume for Storage](https://kubernetes.io/docs/tasks/configure-pod-container/configure-volume-storage/)
 
 kubernetes.io > Documentation > Tasks > Configure Pods and Containers > [Configure a Pod to Use a PersistentVolume for Storage](https://kubernetes.io/docs/tasks/configure-pod-container/configure-persistent-volume-storage/)
 
-### Create busybox pod with two containers, each one will have the image busybox and will run the 'sleep 3600' command. Make both containers mount an emptyDir at '/etc/foo'. Connect to the second busybox, write the first column of '/etc/passwd' file to '/etc/foo/passwd'. Connect to the first busybox and write '/etc/foo/passwd' file to standard output. Delete pod.
+All exercises on namespace pers
 
-<details><summary>show</summary>
-<p>
-
-*This question is probably a better fit for the 'Multi-container-pods' section but I'm keeping it here as it will help you get acquainted with state*
-
-Easiest way to do this is to create a template pod with:
-
-```bash
-kubectl run busybox --image=busybox --restart=Never -o yaml --dry-run=client -- /bin/sh -c 'sleep 3600' > pod.yaml
-vi pod.yaml
-```
-Copy paste the container definition and type the lines that have a comment in the end:
-
-```YAML
-apiVersion: v1
-kind: Pod
-metadata:
-  creationTimestamp: null
-  labels:
-    run: busybox
-  name: busybox
-spec:
-  dnsPolicy: ClusterFirst
-  restartPolicy: Never
-  containers:
-  - args:
-    - /bin/sh
-    - -c
-    - sleep 3600
-    image: busybox
-    imagePullPolicy: IfNotPresent
-    name: busybox
-    resources: {}
-    volumeMounts: #
-    - name: myvolume #
-      mountPath: /etc/foo #
-  - args:
-    - /bin/sh
-    - -c
-    - sleep 3600
-    image: busybox
-    name: busybox2 # don't forget to change the name during copy paste, must be different from the first container's name!
-    volumeMounts: #
-    - name: myvolume #
-      mountPath: /etc/foo #
-  volumes: #
-  - name: myvolume #
-    emptyDir: {} #
-```
-
-Connect to the second container:
-
-```bash
-kubectl exec -it busybox -c busybox2 -- /bin/sh
-cat /etc/passwd | cut -f 1 -d ':' > /etc/foo/passwd 
-cat /etc/foo/passwd # confirm that stuff has been written successfully
-exit
-```
-
-Connect to the first container:
-
-```bash
-kubectl exec -it busybox -c busybox -- /bin/sh
-mount | grep foo # confirm the mounting
-cat /etc/foo/passwd
-exit
-kubectl delete po busybox
-```
-
-</p>
-</details>
-
-
-### Create a PersistentVolume of 10Gi, called 'myvolume'. Make it have accessMode of 'ReadWriteOnce' and 'ReadWriteMany', storageClassName 'normal', mounted on hostPath '/etc/foo'. Save it on pv.yaml, add it to the cluster. Show the PersistentVolumes that exist on the cluster
+### PersistentVolume
+Create a PersistentVolume:
+1. 1Gi
+2. name 'myvolume'. 
+3. Make it have accessMode of 'ReadWriteOnce' and 'ReadWriteMany', 
+4. storageClassName 'normal', 
+5. mounted on hostPath '/etc/foo'. 
+6. Save it on pv.yaml, add it to the cluster. 
+7. Show the PersistentVolumes that exist on the cluster
 
 <details><summary>show</summary>
 <p>
