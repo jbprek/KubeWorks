@@ -473,3 +473,24 @@ kubectl exec -it ubuntu -- /bin/bash
 
 </p>
 </details>
+
+
+### Copy a file from a container to the localfilesystem
+1. create a busybox pod running sleep 3600
+2. copy /etc/passwd file from the pod to the local filesystem
+3. copy the file from (2) into the pod's /tmp directory
+
+<details><summary>show</summary>
+<p>
+
+```bash
+#1 
+kubectl run bus3 --image=busybox --command -- sh -c "sleep 3600"
+# 2 Note missing leading '/'
+kubectl cp bus3:etc/passwd ./passwd.txt
+#3 Note missing leading '/'
+kubectl cp passwd.txt bus3:tmp/
+```
+
+</p>
+</details>
