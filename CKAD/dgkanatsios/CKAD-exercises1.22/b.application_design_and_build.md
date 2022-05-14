@@ -1044,23 +1044,20 @@ kubectl apply -f  moon-pvc.yaml
 
 #C
  kubectl -n moon describe pvc moon-pvc
-
-
-
-
 ```
 
-```
+
  Output
+```
 Events:
 Type    Reason                Age               From                         Message
   ----    ------                ----              ----                         -------
 Normal  ExternalProvisioning  5s (x5 over 40s)  persistentvolume-controller  waiting for a volume to be created, either by external provisioner "to-be-implemented" or manually created by system administrator
 If the file doesn't show on the second pod but it shows on the first, it has most likely been scheduled on a different node.
-
+```
 Copy string "waiting for a volume to be created, either by external provisioner "to-be-implemented" or manually created by system administrator
 If the file doesn't show on the second pod but it shows on the first, it has most likely been scheduled on a different node." Into a file
-```
+
 
 </p>
 </details>
