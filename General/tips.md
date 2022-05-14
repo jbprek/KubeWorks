@@ -38,3 +38,7 @@ kubectl config set-context $(kubectl config current-context) --namespace=labels
 kubectl config view --minify | grep namespace:
 
 alias kfdelpo='function _kfdelpo(){ kubectl delete po $1 --grace-period=0 --force; };_kfdelpo'
+
+
+# Use of kubectl explain
+Remember --recursive option

@@ -19,4 +19,4 @@
 ## Question 19 | Service ClusterIP->NodePort Task weight: 3% -
 ## Question 20 | NetworkPolicy Task weight: 9%
 ## Question 21 | Requests and Limits, ServiceAccount Task weight: 4%
-## Question 22 | Labels Annotattions: 3%
+## Question 22 | Labels Annotations: 3%

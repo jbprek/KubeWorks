@@ -1,8 +1,8 @@
 #Application  Design  and  Build 20%
 
 ## Topics
-- Define, build and modify container images
-- Understand Jobs and CronJobs
+- [Define, build and modify container images](#docker-podman) 
+- Understand [Jobs](#jobs) and [CronJobs](#cronjobs)   
 - Understand  multi-container  Pod  design patterns (e.g. sidecar, init and others)
 - Utilize  persistent  and  ephemeral  volumes
 
@@ -19,7 +19,8 @@ Question 12 | Storage, PV, PVC, Pod volume Task weight: 8%
 Question 13 | Storage, StorageClass, PVC  Task weight: 6%
 
 
-## Define, build and modify container images
+## docker-podman
+**Define, build and modify container images**
 ### Run httpd detached container, mount volume with html content
 - Before : Run the following commands
 ````bash
@@ -141,245 +142,41 @@ docker run --name=mydb  -d -e MARIADB_ROOT_PASSWORD=changeme mariadb
 </p>
 </details>
 
-## Labels and annotations
-kubernetes.io > Documentation > Concepts > Overview > [Labels and Selectors](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#label-selectors)
+###  Container Image (nginx with custom web content)
+- Before : Run the following commands
+````bash
+# Setup a webpage
+mkdir -p ~/dummy/nginxproject/webfiles
+echo "Hello From Docker!" > ~/dummy/nginxproject/webfiles/index.html
+ ````
 
-### Create 3 pods with names nginx1,nginx2,nginx3. All of them should have the label app=v1
 
 <details><summary>show</summary>
 <p>
 
-```bash
-kubectl run nginx1 --image=nginx --restart=Never --labels=app=v1
-kubectl run nginx2 --image=nginx --restart=Never --labels=app=v1
-kubectl run nginx3 --image=nginx --restart=Never --labels=app=v1
-# or
-for i in `seq 1 3`; do kubectl run nginx$i --image=nginx -l app=v1 ; done
-```
-
+````bash
+ docker run --name=mydb  -d mariadb
+ # Docker ps shows that the container is not running
+ docker ps
+ # Inspect the logs
+ docker logs mydb
+ # Output 
+  docker logs mydb
+2022-05-07 12:47:12+00:00 [Note] [Entrypoint]: Entrypoint script for MariaDB Server 1:10.7.3+maria~focal started.
+2022-05-07 12:47:12+00:00 [Note] [Entrypoint]: Switching to dedicated user 'mysql'
+2022-05-07 12:47:12+00:00 [Note] [Entrypoint]: Entrypoint script for MariaDB Server 1:10.7.3+maria~focal started.
+2022-05-07 12:47:12+00:00 [ERROR] [Entrypoint]: Database is uninitialized and password option is not specified
+        You need to specify one of MARIADB_ROOT_PASSWORD, MARIADB_ALLOW_EMPTY_ROOT_PASSWORD and MARIADB_RANDOM_ROOT_PASSWORD
+        
+# Remove the existing container
+docker rm mydb 
+# Issue the right command
+docker run --name=mydb  -d -e MARIADB_ROOT_PASSWORD=changeme mariadb     
+````
 </p>
 </details>
 
-
-### Create container connect interactively (GVS)
-- Run the latest version of Fedora in container
-- In interactive mode start a bash shell and explore the/etc/os-release file as well the kernel version uname -r
-- Disconnect from the container without shutting it down
-
-## Pod design - Labels and annotations
-kubernetes.io > Documentation > Concepts > Overview > [Labels and Selectors](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#label-selectors)
-
-### Create 3 pods with names nginx1,nginx2,nginx3. All of them should have the label app=v1
-
-<details><summary>show</summary>
-<p>
-
-```bash
-kubectl run nginx1 --image=nginx --restart=Never --labels=app=v1
-kubectl run nginx2 --image=nginx --restart=Never --labels=app=v1
-kubectl run nginx3 --image=nginx --restart=Never --labels=app=v1
-# or
-for i in `seq 1 3`; do kubectl run nginx$i --image=nginx -l app=v1 ; done
-```
-
-</p>
-</details>
-
-## Labels & Annotations
-
-### Show all labels of the pods
-
-<details><summary>show</summary>
-<p>
-
-```bash
-kubectl get po --show-labels
-```
-
-</p>
-</details>
-
-### Change the labels of pod 'nginx2' to be app=v2
-
-<details><summary>show</summary>
-<p>
-
-```bash
-kubectl label po nginx2 app=v2 --overwrite
-```
-
-</p>
-</details>
-
-### Get the label 'app' for the pods (show a column with APP labels)
-
-<details><summary>show</summary>
-<p>
-
-```bash
-kubectl get po -L app
-# or
-kubectl get po --label-columns=app
-```
-
-</p>
-</details>
-
-### Get only the 'app=v2' pods
-
-<details><summary>show</summary>
-<p>
-
-```bash
-kubectl get po -l app=v2
-# or
-kubectl get po -l 'app in (v2)'
-# or
-kubectl get po --selector=app=v2
-```
-
-</p>
-</details>
-
-### Remove the 'app' label from the pods we created before
-
-<details><summary>show</summary>
-<p>
-
-```bash
-kubectl label po nginx1 nginx2 nginx3 app-
-# or
-kubectl label po nginx{1..3} app-
-# or
-kubectl label po -l app app-
-```
-
-</p>
-</details>
-
-### Create a pod that will be deployed to a Node that has the label 'accelerator=nvidia-tesla-p100'
-
-<details><summary>show</summary>
-<p>
-
-Add the label to a node:
-
-```bash
-kubectl label nodes <your-node-name> accelerator=nvidia-tesla-p100
-kubectl get nodes --show-labels
-```
-
-We can use the 'nodeSelector' property on the Pod YAML:
-
-```YAML
-apiVersion: v1
-kind: Pod
-metadata:
-  name: cuda-test
-spec:
-  containers:
-    - name: cuda-test
-      image: "k8s.gcr.io/cuda-vector-add:v0.1"
-  nodeSelector: # add this
-    accelerator: nvidia-tesla-p100 # the selection label
-```
-
-You can easily find out where in the YAML it should be placed by:
-
-```bash
-kubectl explain po.spec
-```
-
-OR:
-Use node affinity (https://kubernetes.io/docs/tasks/configure-pod-container/assign-pods-nodes-using-node-affinity/#schedule-a-pod-using-required-node-affinity)
-
-```YAML
-apiVersion: v1
-kind: Pod
-metadata:
-  name: affinity-pod
-spec:
-  affinity:
-    nodeAffinity:
-      requiredDuringSchedulingIgnoredDuringExecution:
-        nodeSelectorTerms:
-        - matchExpressions:
-          - key: accelerator
-            operator: In
-            values:
-            - nvidia-tesla-p100
-  containers:
-    ...
-```
-
-</p>
-</details>
-
-### Annotate pods nginx1, nginx2, nginx3 with "description='my description'" value
-
-<details><summary>show</summary>
-<p>
-
-
-```bash
-kubectl annotate po nginx1 nginx2 nginx3 description='my description'
-
-#or
-
-kubectl annotate po nginx{1..3} description='my description'
-```
-
-</p>
-</details>
-
-### Check the annotations for pod nginx1
-
-<details><summary>show</summary>
-<p>
-
-```bash
-kubectl annotate pod nginx1 --list
-  
-# or
-
-kubectl describe po nginx1 | grep -i 'annotations'
-
-# or
-
-kubectl get po nginx1 -o custom-columns=Name:metadata.name,ANNOTATIONS:metadata.annotations.description
-```
-
-As an alternative to using `| grep` you can use jsonPath like `kubectl get po nginx1 -o jsonpath='{.metadata.annotations}{"\n"}'`
-
-</p>
-</details>
-
-### Remove the annotations for these three pods
-
-<details><summary>show</summary>
-<p>
-
-```bash
-kubectl annotate po nginx{1..3} description-
-```
-
-</p>
-</details>
-
-### Remove these pods to have a clean state in your cluster
-
-<details><summary>show</summary>
-<p>
-
-```bash
-kubectl delete po nginx{1..3}
-```
-
-</p>
-</details>
-
-
-## Jobs
+## <a name="jobs">Jobs</a>
 
 ### Create a job named pi with image perl that runs the command with arguments "perl -Mbignum=bpi -wle 'print bpi(2000)'"
 
@@ -622,7 +419,7 @@ kubectl delete job busybox
 </p>
 </details>
 
-## Cron jobs
+## <a name="cronjobs">Cron jobs</a>
 
 kubernetes.io > Documentation > Tasks > Run Jobs > [Running Automated Tasks with a CronJob](https://kubernetes.io/docs/tasks/job/automated-tasks-with-cron-jobs/)
 
@@ -745,6 +542,7 @@ status: {}
 
 
 # Multi-container Pods
+
 
 ### Create a Pod with two containers, both with image busybox and command "echo hello; sleep 3600". Connect to the second container and run 'ls'
 
@@ -888,6 +686,140 @@ kubectl delete po box
 
 </p>
 </details>
+
+
+### CKAD Question 16 | Logging sidecar 6%
+
+The Tech Lead of Mercury2D decided its time for more logging, to finally fight all these missing data incidents. There is an existing container named cleaner-con in Deployment cleaner in Namespace mercury. This container mounts a volume and writes logs into a file called cleaner.log.
+
+The yaml for the existing Deployment is available at /opt/course/16/cleaner.yaml. Persist your changes at /opt/course/16/cleaner-new.yaml but also make sure the Deployment is running.
+
+Create a sidecar container named logger-con, image busybox:1.31.0 , which mounts the same volume and writes the content of cleaner.log to stdout, you can use the tail -f command for this. This way it can be picked up by kubectl logs.
+
+Check if the logs of the new container reveal something about the missing data incidents.
+
+#### Setup
+```bash
+kubectl create namespace mercury
+
+cat << EOF > ~/dummy/cleaner.yml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  name: cleaner
+  namespace: mercury
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      id: cleaner
+  template:
+    metadata:
+      labels:
+        id: cleaner
+    spec:
+      volumes:
+      - name: logs
+        emptyDir: {}
+      initContainers:
+      - name: init
+        image: bash:5.0.11
+        command: ['bash', '-c', 'echo init > /var/log/cleaner/cleaner.log']
+        volumeMounts:
+        - name: logs
+          mountPath: /var/log/cleaner
+      containers:
+      - name: cleaner-con
+        image: bash:5.0.11
+        args: ['bash', '-c', 'while true; do echo `date`: "remove random file" >> /var/log/cleaner/cleaner.log; sleep 1; done']
+        volumeMounts:
+        - name: logs
+          mountPath: /var/log/cleaner
+EOF
+
+kubectl apply -f ~/dummy/cleaner.yml
+```
+
+#### Cleanup
+```bash
+kubectl delete ns mercury
+```
+
+<details><summary>show</summary>
+<p>
+
+
+
+```bash
+cp dummy/cleanup.yml dummy/cleanup-new.yml
+```
+
+Edit cleanup-new.yml as follows 
+```yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+   creationTimestamp: null
+   name: cleaner
+   namespace: mercury
+spec:
+   replicas: 2
+   selector:
+      matchLabels:
+         id: cleaner
+   template:
+      metadata:
+         labels:
+            id: cleaner
+      spec:
+         volumes:
+            - name: logs
+              emptyDir: {}
+         initContainers:
+            - name: init
+              image: bash:5.0.11
+              command: ['bash', '-c', 'echo init > /var/log/cleaner/cleaner.log']
+              volumeMounts:
+                 - name: logs
+                   mountPath: /var/log/cleaner
+         containers:
+            - name: cleaner-con
+              image: bash:5.0.11
+              args: ['bash', '-c', 'while true; do echo Wed May 11 07:40:46 AM UTC 2022: "remove random file" >> /var/log/cleaner/cleaner.log; sleep 1; done']
+              volumeMounts:
+                 - name: logs
+                   mountPath: /var/log/cleaner
+# New section below                  
+            - name: logger-con
+              image: busybox:1.31.0
+              args: ['/bin/sh', '-c', 'tail -f /var/log/cleaner/cleaner.log']
+              volumeMounts:
+                 - name: logs
+                   mountPath: /var/log/cleaner
+
+```
+
+```bash
+# Apply changes
+kubectl apply -f cleanup-new.yml
+# Check deployment progress
+
+kubectl -n mercury rollout history deploy cleaner
+kubectl -n mercury rollout history deploy cleaner --revision 1
+kubectl -n mercury rollout history deploy cleaner --revision 2
+# See the logs of a pod's logger container
+kubectl -n mercury logs cleaner-799bf8b767-24r6z -c logger-con
+```
+
+
+</p>
+</details>
+
+
+
 
 
 ## Define volumes

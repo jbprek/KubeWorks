@@ -1,5 +1,5 @@
 # 1.23 Curriculum
-## 20% - Application Deployment
+## 20% - Application Design and Build
  - Define, build and modify container images
  - Understand Jobs and CronJobs
  - Understand multi-container Pod design patterns (e.g. sidecar, init and others)
