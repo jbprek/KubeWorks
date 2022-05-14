@@ -541,7 +541,7 @@ status: {}
 </details>
 
 
-## <a name="mcp">Multi-container Pods>/a>
+## <a name="mcp">Multi-container Pods</a>
 
 
 ### Create a Pod with two containers, both with image busybox and command "echo hello; sleep 3600". Connect to the second container and run 'ls'
