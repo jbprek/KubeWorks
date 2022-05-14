@@ -1058,32 +1058,13 @@ Type    Reason                Age               From                         Mes
 Normal  ExternalProvisioning  5s (x5 over 40s)  persistentvolume-controller  waiting for a volume to be created, either by external provisioner "to-be-implemented" or manually created by system administrator
 If the file doesn't show on the second pod but it shows on the first, it has most likely been scheduled on a different node.
 
-```bash
-# check which nodes the pods are on
-kubectl get po busybox -o wide
-kubectl get po busybox2 -o wide
-```
-
 Copy string "waiting for a volume to be created, either by external provisioner "to-be-implemented" or manually created by system administrator
 If the file doesn't show on the second pod but it shows on the first, it has most likely been scheduled on a different node." Into a file
-
-</p>
-</details>
-
-### Create a busybox pod with 'sleep 3600' as arguments. Copy '/etc/passwd' from the pod to your local folder
-
-<details><summary>show</summary>
-<p>
-
-```bash
-kubectl run busybox --image=busybox --restart=Never -- sleep 3600
-kubectl cp busybox:etc/passwd ./passwd # kubectl cp command
-# previous command might report an error, feel free to ignore it since copy command works
-cat passwd
 ```
 
 </p>
 </details>
+
 
 ## TODO Ephemeral volumes
 
