@@ -707,7 +707,6 @@ Check if the logs of the new container reveal something about the missing data i
 
 #### Setup
 ```bash
-kubectl create namespace mercury
 
 cat << EOF > ~/mcp//cleaner.yml
 
@@ -716,7 +715,6 @@ kind: Deployment
 metadata:
   creationTimestamp: null
   name: cleaner
-  namespace: mcp
 spec:
   replicas: 2
   selector:
