@@ -716,7 +716,7 @@ kind: Deployment
 metadata:
   creationTimestamp: null
   name: cleaner
-  namespace: mercury
+  namespace: mcp
 spec:
   replicas: 2
   selector:
