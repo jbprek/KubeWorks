@@ -3,7 +3,7 @@
 ## Topics
 - [Define, build and modify container images](#docker-podman) 
 - Understand [Jobs](#jobs) and [CronJobs](#cronjobs)   
-- [Understand  multi-container  Pod  design patterns (e.g. sidecar, init and others)](#Multi-container Pods)
+- [Understand  multi-container  Pod  design patterns](#Multi-container Pods)
 - Utilize  persistent  and  ephemeral  volumes
 
 ## CKAD exam ex
