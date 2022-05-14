@@ -986,7 +986,23 @@ kubectl exec busybox -it -- cp /etc/passwd /etc/foo/passwd
 </p>
 </details>
 
-### Create a second pod which is identical with the one you just created (you can easily do it by changing the 'name' property on pod.yaml). Connect to it and verify that '/etc/foo' contains the 'passwd' file. Delete pods to cleanup. Note: If you can't see the file from the second pod, can you figure out why? What would you do to fix that?
+### Storage, StorageClass, PVC CKAD 6%
+Team Moonpie, which has the Namespace moon, needs more storage.
+
+A. Create a new Storage class using:
+1. Name my-sc
+2. Provisioner to-be-implemented
+3. Retain policy: Retain
+
+B. Create a new PersistentVolumeClaim 
+1. named moon-pvc
+2. in that namespace moon
+4. use w StorageClass my-sc 
+5. The claim should request storage of 1Mi,
+6.  accessMode of ReadWriteOnce
+
+C. The provisioner to-be-implemented will be created by another team, so it's expected that the PVC will not boot yet. Confirm this by writing the log message from the PVC into a file.
+
 
 
 
@@ -996,14 +1012,50 @@ kubectl exec busybox -it -- cp /etc/passwd /etc/foo/passwd
 Create the second pod, called busybox2:
 
 ```bash
-vim pod.yaml
-# change 'metadata.name: busybox' to 'metadata.name: busybox2'
-kubectl create -f pod.yaml
-kubectl exec busybox2 -- ls /etc/foo # will show 'passwd'
-# cleanup
-kubectl delete po busybox busybox2
+#A
+cat << EOF > my-sc.yaml
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: my-sc
+provisioner: to-be-implemented
+reclaimPolicy: Retain
+EOF
+
+kubectl apply -f  my-sc.yaml
+
+# B
+cat << EOF > moon-pvc.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: moon-pvc
+  namespace: moon
+spec:
+  storageClassName: my-sc
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Mi
+EOF
+
+kubectl apply -f  moon-pvc.yaml
+
+#C
+ kubectl -n moon describe pvc moon-pvc
+
+
+
+
 ```
 
+```
+ Output
+Events:
+Type    Reason                Age               From                         Message
+  ----    ------                ----              ----                         -------
+Normal  ExternalProvisioning  5s (x5 over 40s)  persistentvolume-controller  waiting for a volume to be created, either by external provisioner "to-be-implemented" or manually created by system administrator
 If the file doesn't show on the second pod but it shows on the first, it has most likely been scheduled on a different node.
 
 ```bash
@@ -1012,9 +1064,8 @@ kubectl get po busybox -o wide
 kubectl get po busybox2 -o wide
 ```
 
-If they are on different nodes, you won't see the file, because we used the `hostPath` volume type.
-If you need to access the same files in a multi-node cluster, you need a volume type that is independent of a specific node.
-There are lots of different types per cloud provider [(see here)](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#types-of-persistent-volumes), a general solution could be to use NFS.
+Copy string "waiting for a volume to be created, either by external provisioner "to-be-implemented" or manually created by system administrator
+If the file doesn't show on the second pod but it shows on the first, it has most likely been scheduled on a different node." Into a file
 
 </p>
 </details>
