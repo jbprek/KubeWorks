@@ -19,7 +19,7 @@ Question 12 | Storage, PV, PVC, Pod volume Task weight: 8%
 Question 13 | Storage, StorageClass, PVC  Task weight: 6%
 
 
-## docker-podman
+## <a name="docker-podman">Define, build and modify container images</a>
 **Define, build and modify container images**
 ### Run httpd detached container, mount volume with html content
 - Before : Run the following commands
@@ -593,7 +593,12 @@ kubectl delete po busybox
 </p>
 </details>
 
-### Create pod with nginx container exposed at port 80. Add a busybox init container which downloads a page using "wget -O /work-dir/index.html http://neverssl.com/online". Make a volume of type emptyDir and mount it in both containers. For the nginx container, mount it on "/usr/share/nginx/html" and for the initcontainer, mount it on "/work-dir". When done, get the IP of the created pod and create a busybox pod and run "wget -O- IP"
+### Init Container 
+Create pod with :
+- nginx container exposed at port 80. 
+- Add a busybox init container which downloads a page using "wget -O /work-dir/index.html http://neverssl.com/online". 
+- Make a volume of type emptyDir and mount it in both containers. 
+- For the nginx container, mount it on "/usr/share/nginx/html" and for the initcontainer, mount it on "/work-dir". When done, get the IP of the created pod and create a busybox pod and run "wget -O- IP"
 
 <details><summary>show</summary>
 <p>
