@@ -855,7 +855,7 @@ metadata:
 spec:
   storageClassName: normal
   capacity:
-    storage: 10Gi
+    storage: 1Gi
   accessModes:
     - ReadWriteOnce
     - ReadWriteMany
@@ -903,7 +903,7 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 4Gi
+      storage: 200Mi
 ```
 
 Create it on the cluster:
@@ -922,7 +922,12 @@ kubectl get pv # will show as 'Bound' as well
 </p>
 </details>
 
-### Create a busybox pod with command 'sleep 3600', save it on pod.yaml. Mount the PersistentVolumeClaim to '/etc/foo'. Connect to the 'busybox' pod, and copy the '/etc/passwd' file to '/etc/foo/passwd'
+### Pod Using PVC
+Create a busybox pod 
+1. with command 'sleep 3600', 
+2. save it on pod.yaml. 
+3. Mount the PersistentVolumeClaim to '/etc/foo'. 
+4. Connect to the 'busybox' pod, and copy the '/etc/passwd' file to '/etc/foo/passwd'
 
 <details><summary>show</summary>
 <p>
