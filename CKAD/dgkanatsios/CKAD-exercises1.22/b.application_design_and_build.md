@@ -178,7 +178,7 @@ docker run --name=mydb  -d -e MARIADB_ROOT_PASSWORD=changeme mariadb
 
 ## <a name="jobs">Jobs</a>
 
-### Job creation, monitor, logging
+### 2 Job creation, monitor, logging
 A. Create a job 
 1. named pi with 
 2. image perl that 
@@ -190,7 +190,6 @@ B.
 
 <details><summary>show</summary>
 <p>
-
 
 ```bash
 # A. 
@@ -221,35 +220,23 @@ kubectl delete job pi
 </p>
 </details>
 
-### Create a job with the image busybox that executes the command 'echo hello;sleep 30;echo world'
-
+### 2 .Job creation, monitor, logging 
+1. Create a job with the image busybox that executes the command 'echo hello;sleep 30;echo world'
+2. Follow the logs for the pod (you'll wait for 30 seconds)
+3. See the status of the job, describe it and see the logs
+4. Delete the job
 <details><summary>show</summary>
 <p>
 
 ```bash
+# 1.
 kubectl create job busybox --image=busybox -- /bin/sh -c 'echo hello;sleep 30;echo world'
 ```
-
-</p>
-</details>
-
-### Follow the logs for the pod (you'll wait for 30 seconds)
-
-<details><summary>show</summary>
-<p>
 
 ```bash
 kubectl get po # find the job pod
 kubectl logs busybox-ptx58 -f # follow the logs
 ```
-
-</p>
-</details>
-
-### See the status of the job, describe it and see the logs
-
-<details><summary>show</summary>
-<p>
 
 ```bash
 kubectl get jobs
@@ -257,13 +244,6 @@ kubectl describe jobs busybox
 kubectl logs job/busybox
 ```
 
-</p>
-</details>
-
-### Delete the job
-
-<details><summary>show</summary>
-<p>
 
 ```bash
 kubectl delete job busybox
