@@ -12,7 +12,7 @@
 - [Harness Article](https://harness.io/blog/blue-green-canary-deployment-strategies/)
 
 
-## <a name="Labels>Labels & Annotations</a>
+## <a name="Labels">Labels & Annotations</a>
 
 ### Show all labels of the pods
 Create 3 nginx pods with names nginx1, nginx2, nginx3
