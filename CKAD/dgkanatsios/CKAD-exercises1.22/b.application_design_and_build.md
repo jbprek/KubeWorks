@@ -178,22 +178,24 @@ docker run --name=mydb  -d -e MARIADB_ROOT_PASSWORD=changeme mariadb
 
 ## <a name="jobs">Jobs</a>
 
-### Create a job named pi with image perl that runs the command with arguments "perl -Mbignum=bpi -wle 'print bpi(2000)'"
+### Job creation, monitor, logging
+A. Create a job 
+1. named pi with 
+2. image perl that 
+3. runs the command with arguments "perl -Mbignum=bpi -wle 'print bpi(2000)'"
+
+B. 
+1. Wait till it's done 
+2. get the output
 
 <details><summary>show</summary>
 <p>
+
 
 ```bash
+# A. 
 kubectl create job pi  --image=perl -- perl -Mbignum=bpi -wle 'print bpi(2000)'
 ```
-
-</p>
-</details>
-
-### Wait till it's done, get the output
-
-<details><summary>show</summary>
-<p>
 
 ```bash
 kubectl get jobs -w # wait till 'SUCCESSFUL' is 1 (will take some time, perl image might be big)
