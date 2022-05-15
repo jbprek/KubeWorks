@@ -1,9 +1,18 @@
 #Application  Deployment 20 %
+
+## Curicullum
+- Use Kubernetes primitives to implement common deployment strategies (e.g. blue/ green or canary)
+- Understand Deployments and how to perform rolling updates
+- Use the Helm package
+
+## Topics 
+- [Labels & Annotations](#Labels)
+- [Deployments](#Deployments)
 ## TODO Blue/Green canary
 - [Harness Article](https://harness.io/blog/blue-green-canary-deployment-strategies/)
 
 
-## Labels & Annotations
+## <a name="Labels>Labels & Annotations</a>
 
 ### Show all labels of the pods
 
@@ -197,7 +206,7 @@ kubectl delete po nginx{1..3}
 </details>
 
 
-## Deployments
+## <a name="Deployments">Deployments</a>
 
 kubernetes.io > Documentation > Concepts > Workloads > Controllers > [Deployments](https://kubernetes.io/docs/concepts/workloads/controllers/deployment)
 
