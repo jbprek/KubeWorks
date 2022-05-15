@@ -177,8 +177,58 @@ docker run --name=mydb  -d -e MARIADB_ROOT_PASSWORD=changeme mariadb
 </details>
 
 ## <a name="jobs">Jobs</a>
+###  Quiz - Describe the 3 different types of jobs
 
-### 2 Job creation, monitor, logging
+<details><summary>show</summary>
+<p>
+
+1. Non Parallel jobs
+````
+   completions=x
+   parallelism=1 (default)
+````
+
+2. Parallel jobs with fixed completion count
+````
+   completions=x
+   parallelism=y ( y <= x otherwise is set to x)
+````
+3. Parallel jobs with work queue
+````
+   completions=1 
+   parallelism=n (usually to the number of nodes)
+   Once one is complete the job is complete
+````
+</p>
+</details>
+
+
+## <a name="jobs">Jobs</a>
+###  Quiz - Describe the job parameters for
+1. Maximum time to be consumed in a job
+2. Maximum time for the job to be retained once completed
+
+<details><summary>show</summary>
+<p>
+
+1. Maximum time to be consumed in a job
+````
+   .spec.activeDeadlineSeconds field
+  Do this by setting the .spec.activeDeadlineSeconds field of the Job to a number of seconds. The activeDeadlineSeconds applies to the duration of the job, no matter how many Pods are created. Once a Job reaches activeDeadlineSeconds, all of its running Pods are terminated and the Job status will become type: Failed with reason: DeadlineExceeded.
+````
+
+2. Maximum time for the job to be retained once completed
+````
+  .spec.ttlSecondsAfterFinished field
+  Another way to clean up finished Jobs (either Complete or Failed) automatically is to use a TTL mechanism provided by a TTL controller for finished resources, by specifying the .spec.ttlSecondsAfterFinished field of the Job.
+````
+
+</p>
+</details>
+
+
+
+### 1. Job creation, monitor, logging
 A. Create a job 
 1. named pi with 
 2. image perl that 
@@ -220,7 +270,7 @@ kubectl delete job pi
 </p>
 </details>
 
-### 2 .Job creation, monitor, logging 
+### 2. Job creation, monitor, logging 
 1. Create a job with the image busybox that executes the command 'echo hello;sleep 30;echo world'
 2. Follow the logs for the pod (you'll wait for 30 seconds)
 3. See the status of the job, describe it and see the logs
