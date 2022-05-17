@@ -14,8 +14,15 @@
 
 ## <a name="Labels">Labels & Annotations</a>
 
+Remember -l -L options
+
 ### Show all labels of the pods
 Create 3 nginx pods with names nginx1, nginx2, nginx3
+
+```bash
+
+```
+
 Show all labels of the pods:
 
 <details><summary>show</summary>
@@ -86,7 +93,10 @@ kubectl label po -l app app-
 </p>
 </details>
 
-### Create a pod that will be deployed to a Node that has the label 'accelerator=nvidia-tesla-p100'
+### Create a nignx pod named nginx4 that will be deployed to a Node that has the label 'owner=john'
+
+1. Label the single node
+2. Create the pod
 
 <details><summary>show</summary>
 <p>
@@ -94,23 +104,38 @@ kubectl label po -l app app-
 Add the label to a node:
 
 ```bash
-kubectl label nodes <your-node-name> accelerator=nvidia-tesla-p100
-kubectl get nodes --show-labels
+# 1
+kubectl label nodes <your-node-name> owner=john
+kubectl get nodes -L owner
 ```
 
-We can use the 'nodeSelector' property on the Pod YAML:
+```bash
+# 2
+# Create yml
+kubectl run nginx4 --image=nginx $do > nginx4.yml
+```
+Edit file, use the 'nodeSelector' property on the Pod YAML:
 
 ```YAML
 apiVersion: v1
 kind: Pod
 metadata:
-  name: cuda-test
+  creationTimestamp: null
+  labels:
+    run: nginx4
+  name: nginx4
 spec:
   containers:
-    - name: cuda-test
-      image: "k8s.gcr.io/cuda-vector-add:v0.1"
-  nodeSelector: # add this
-    accelerator: nvidia-tesla-p100 # the selection label
+    - image: nginx
+      name: nginx4
+      resources: {}
+  nodeSelector:         #ADDED
+    owner: john         #ADDED
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+status: {}
+  ~
+
 ```
 
 You can easily find out where in the YAML it should be placed by:
@@ -487,3 +512,7 @@ kubectl delete deploy/nginx hpa/nginx
 </details>
 
 ## TODO Helm
+
+Useful links
+- Helm : https://helm.sh/
+- Artfacthub: https://artifacthub.io/
