@@ -40,6 +40,18 @@ kubectl get po --show-labels
 </p>
 </details>
 
+### Set label of all nginx pods to app=v1
+
+<details><summary>show</summary>
+<p>
+
+```bash
+kubectl label nginx{1..3} app=v1
+```
+
+</p>
+</details>
+
 ### Change the labels of pod 'nginx2' to be app=v2
 
 <details><summary>show</summary>
