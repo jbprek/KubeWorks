@@ -5,9 +5,12 @@
 - Understand Deployments and how to perform rolling updates
 - Use the Helm package
 
-## Topics 
+## Topics
 - [Labels & Annotations](#Labels)
 - [Deployments](#Deployments)
+- [Helm Management](#Helm)
+- [Canary Blue/Green Deployments](#bluegreen)
+
 ## TODO Blue/Green canary
 - [Harness Article](https://harness.io/blog/blue-green-canary-deployment-strategies/)
 
@@ -511,8 +514,51 @@ kubectl delete deploy/nginx hpa/nginx
 </p>
 </details>
 
-## TODO Helm
+## <a name="Helo">Helm Management</a>
 
-Useful links
-- Helm : https://helm.sh/
-- Artfacthub: https://artifacthub.io/
+<details><summary>show</summary>
+
+<p>
+- Chart
+- Repository 
+- Release
+</p>
+</details>
+
+### Question 4 | Helm Management
+Task weight: 5%
+
+### List the basic entities of Helm
+
+
+
+
+
+Team Mercury asked you to perform some operations using Helm, all in Namespace mercury:
+
+Delete release internal-issue-report-apiv1
+Upgrade release internal-issue-report-apiv2 to any newer version of chart bitnami/nginx available
+Install a new release internal-issue-report-apache of chart bitnami/apache. The Deployment should have two replicas, set these via Helm-values during install
+There seems to be a broken release, stuck in pending-upgrade state. Find it and delete it
+
+## <a name="bluegreen">Canary Blue/Green Deployments</a>
+
+## Canary Deployment
+In namespace gsv1
+- Run a deployment named old-nginx with the following requirements
+1. create a config map to provide an index.html file with the text "welcome to the old version" named cm1
+2. Use image nginx:1.14
+3. run 3 replicas
+- Create a canary deployment to update the above
+1. create a config map to provide an index.html file with the text "welcome to the new version"
+2. Use image nginx:latest
+- Complete the transition by :
+1. Verifying the correctness of the new deployment
+2. Scale down the old version to 0 replicas
+
+<details><summary>show</summary>
+<p>
+
+
+</p>
+</details>

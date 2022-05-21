@@ -1,3 +1,4 @@
+
 # 1.23 Curriculum
 ## 20% - Application Design and Build
  - Define, build and modify container images
