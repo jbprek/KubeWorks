@@ -23,7 +23,9 @@ Remember -l -L options
 Create 3 nginx pods with names nginx1, nginx2, nginx3
 
 ```bash
-
+kubectl run nginx1 --image=nginx
+kubectl run nginx2 --image=nginx
+kubectl run nginx3 --image=nginx
 ```
 
 Show all labels of the pods:
