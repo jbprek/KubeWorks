@@ -10,6 +10,7 @@
 - [Deployments](#Deployments)
 - [Helm Management](#Helm)
 - [Canary Blue/Green Deployments](#bluegreen)
+- [Record](#record)
 
 ## TODO Blue/Green canary
 - [Harness Article](https://harness.io/blog/blue-green-canary-deployment-strategies/)
@@ -19,7 +20,7 @@
 
 Remember -l -L options
 
-### Show all labels of the pods
+### L1. Show all labels of the pods
 Create 3 nginx pods with names nginx1, nginx2, nginx3
 
 ```bash
@@ -40,7 +41,7 @@ kubectl get po --show-labels
 </p>
 </details>
 
-### Set label of all nginx pods to app=v1
+### L2. Set label of all nginx pods to app=v1
 
 <details><summary>show</summary>
 <p>
@@ -52,7 +53,7 @@ kubectl label nginx{1..3} app=v1
 </p>
 </details>
 
-### Change the labels of pod 'nginx2' to be app=v2
+### L3 Change the labels of pod 'nginx2' to be app=v2
 
 <details><summary>show</summary>
 <p>
@@ -64,7 +65,7 @@ kubectl label po nginx2 app=v2 --overwrite
 </p>
 </details>
 
-### Get the label 'app' for the pods (show a column with APP labels)
+### L4 Get the label 'app' for the pods (show a column with APP labels)
 
 <details><summary>show</summary>
 <p>
@@ -78,7 +79,7 @@ kubectl get po --label-columns=app
 </p>
 </details>
 
-### Get only the 'app=v2' pods
+### L5 Get only the 'app=v2' pods
 
 <details><summary>show</summary>
 <p>
@@ -94,7 +95,7 @@ kubectl get po --selector=app=v2
 </p>
 </details>
 
-### Remove the 'app' label from the pods we created before
+### L6 Remove the 'app' label from the pods we created before
 
 <details><summary>show</summary>
 <p>
@@ -110,7 +111,7 @@ kubectl label po -l app app-
 </p>
 </details>
 
-### Create a nignx pod named nginx4 that will be deployed to a Node that has the label 'owner=john'
+### L7 Create a nignx pod named nginx4 that will be deployed to a Node that has the label 'owner=john'
 
 1. Label the single node
 2. Create the pod
@@ -186,7 +187,7 @@ spec:
 </p>
 </details>
 
-### Annotate pods nginx1, nginx2, nginx3 with "description='my description'" value
+### L8 Annotate pods nginx1, nginx2, nginx3 with "description='my description'" value
 
 <details><summary>show</summary>
 <p>
@@ -203,7 +204,7 @@ kubectl annotate po nginx{1..3} description='my description'
 </p>
 </details>
 
-### Check the annotations for pod nginx1
+### L8 Check the annotations for pod nginx1
 
 <details><summary>show</summary>
 <p>
@@ -225,7 +226,7 @@ As an alternative to using `| grep` you can use jsonPath like `kubectl get po ng
 </p>
 </details>
 
-### Remove the annotations for these three pods
+### L8 Remove the annotations for these three pods
 
 <details><summary>show</summary>
 <p>
@@ -576,3 +577,9 @@ In namespace gsv1
 
 </p>
 </details>
+
+
+## <a name="record">Record</a>
+### TODO 
+- green/blue deploys
+### Missed

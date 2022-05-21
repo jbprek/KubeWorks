@@ -5,6 +5,7 @@
 - Understand [Jobs](#jobs) and [CronJobs](#cronjobs)   
 - [Understand  multi-container  Pod  design patterns](#mcp)
 - [Utilize  persistent  and  ephemeral  volumes](#per)
+- [Record](#record)
 
 ## CKAD exam ex
 
