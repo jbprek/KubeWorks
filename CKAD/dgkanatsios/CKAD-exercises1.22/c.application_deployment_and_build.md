@@ -255,7 +255,7 @@ kubectl delete po nginx{1..3}
 
 kubernetes.io > Documentation > Concepts > Workloads > Controllers > [Deployments](https://kubernetes.io/docs/concepts/workloads/controllers/deployment)
 
-### Create a deployment with image nginx:1.18.0, called nginx, having 2 replicas, defining port 80 as the port that this container exposes (don't create a service for this deployment)
+### D1 Create a deployment with image nginx:1.18.0, called nginx, having 2 replicas, defining port 80 as the port that this container exposes (don't create a service for this deployment)
 
 <details><summary>show</summary>
 <p>
@@ -284,7 +284,7 @@ kubectl create deploy nginx --image=nginx:1.18.0 --replicas=2 --port=80
 </p>
 </details>
 
-### View the YAML of this deployment
+### D2 View the YAML of this deployment
 
 <details><summary>show</summary>
 <p>
@@ -296,7 +296,7 @@ kubectl get deploy nginx -o yaml
 </p>
 </details>
 
-### View the YAML of the replica set that was created by this deployment
+### D3 View the YAML of the replica set that was created by this deployment
 
 <details><summary>show</summary>
 <p>
@@ -313,7 +313,7 @@ kubectl get rs nginx-7bf7478b77 -o yaml
 </p>
 </details>
 
-### Get the YAML for one of the pods
+### D4 Get the YAML for one of the pods
 
 <details><summary>show</summary>
 <p>
@@ -329,7 +329,7 @@ kubectl get po nginx-7bf7478b77-gjzp8 -o yaml
 </p>
 </details>
 
-### Check how the deployment rollout is going
+### D5 Check how the deployment rollout is going
 
 <details><summary>show</summary>
 <p>
@@ -341,7 +341,7 @@ kubectl rollout status deploy nginx
 </p>
 </details>
 
-### Update the nginx image to nginx:1.19.8
+### D6 Update the nginx image to nginx:1.19.8
 
 <details><summary>show</summary>
 <p>
@@ -357,7 +357,7 @@ The syntax of the 'kubectl set image' command is `kubectl set image (-f FILENAME
 </p>
 </details>
 
-### Check the rollout history and confirm that the replicas are OK
+### D7 Check the rollout history and confirm that the replicas are OK
 
 <details><summary>show</summary>
 <p>
@@ -372,7 +372,7 @@ kubectl get po
 </p>
 </details>
 
-### Undo the latest rollout and verify that new pods have the old image (nginx:1.18.0)
+### D8 Undo the latest rollout and verify that new pods have the old image (nginx:1.18.0)
 
 <details><summary>show</summary>
 <p>
@@ -387,7 +387,7 @@ kubectl describe po nginx-5ff4457d65-nslcl | grep -i image # should be nginx:1.1
 </p>
 </details>
 
-### Do an on purpose update of the deployment with a wrong image nginx:1.91
+### D10 Do an on purpose update of the deployment with a wrong image nginx:1.91
 
 <details><summary>show</summary>
 <p>
@@ -403,7 +403,7 @@ kubectl edit deploy nginx
 </p>
 </details>
 
-### Verify that something's wrong with the rollout
+### D11 Verify that something's wrong with the rollout
 
 <details><summary>show</summary>
 <p>
@@ -417,8 +417,7 @@ kubectl get po # you'll see 'ErrImagePull' or 'ImagePullBackOff'
 </p>
 </details>
 
-
-### Return the deployment to the second revision (number 2) and verify the image is nginx:1.19.8
+### D12 Return the deployment to the second revision (number 2) and verify the image is nginx:1.19.8
 
 <details><summary>show</summary>
 <p>
@@ -432,7 +431,7 @@ kubectl rollout status deploy nginx # Everything should be OK
 </p>
 </details>
 
-### Check the details of the fourth revision (number 4)
+### D13 Check the details of the fourth revision (number 4)
 
 <details><summary>show</summary>
 <p>
@@ -444,7 +443,7 @@ kubectl rollout history deploy nginx --revision=4 # You'll also see the wrong im
 </p>
 </details>
 
-### Scale the deployment to 5 replicas
+### D15 Scale the deployment to 5 replicas
 
 <details><summary>show</summary>
 <p>
@@ -458,7 +457,7 @@ kubectl describe deploy nginx
 </p>
 </details>
 
-### Autoscale the deployment, pods between 5 and 10, targetting CPU utilization at 80%
+### D16 Autoscale the deployment, pods between 5 and 10, targetting CPU utilization at 80%
 
 <details><summary>show</summary>
 <p>
@@ -472,7 +471,7 @@ kubectl get hpa nginx
 </p>
 </details>
 
-### Pause the rollout of the deployment
+### D17 Pause the rollout of the deployment
 
 <details><summary>show</summary>
 <p>
@@ -484,7 +483,7 @@ kubectl rollout pause deploy nginx
 </p>
 </details>
 
-### Update the image to nginx:1.19.9 and check that there's nothing going on, since we paused the rollout
+### D18 Update the image to nginx:1.19.9 and check that there's nothing going on, since we paused the rollout
 
 <details><summary>show</summary>
 <p>
@@ -500,7 +499,7 @@ kubectl rollout history deploy nginx # no new revision
 </p>
 </details>
 
-### Resume the rollout and check that the nginx:1.19.9 image has been applied
+### D19 Resume the rollout and check that the nginx:1.19.9 image has been applied
 
 <details><summary>show</summary>
 <p>
@@ -514,7 +513,7 @@ kubectl rollout history deploy nginx --revision=6 # insert the number of your la
 </p>
 </details>
 
-### Delete the deployment and the horizontal pod autoscaler you created
+### D20 Delete the deployment and the horizontal pod autoscaler you created
 
 <details><summary>show</summary>
 <p>
@@ -531,6 +530,9 @@ kubectl delete deploy/nginx hpa/nginx
 
 ## <a name="Helo">Helm Management</a>
 
+
+### H0 List the basic entities of Helm
+
 <details><summary>show</summary>
 
 <p>
@@ -540,14 +542,10 @@ kubectl delete deploy/nginx hpa/nginx
 </p>
 </details>
 
+
+
 ### Question 4 | Helm Management
 Task weight: 5%
-
-### List the basic entities of Helm
-
-
-
-
 
 Team Mercury asked you to perform some operations using Helm, all in Namespace mercury:
 
@@ -558,7 +556,7 @@ There seems to be a broken release, stuck in pending-upgrade state. Find it and 
 
 ## <a name="bluegreen">Canary Blue/Green Deployments</a>
 
-## Canary Deployment
+## C1 Canary Deployment
 In namespace gsv1
 - Run a deployment named old-nginx with the following requirements
 1. create a config map to provide an index.html file with the text "welcome to the old version" named cm1
@@ -583,3 +581,4 @@ In namespace gsv1
 ### TODO 
 - green/blue deploys
 ### Missed
+- L7, L8
