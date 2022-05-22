@@ -4,50 +4,38 @@
 - Demonstrate basic understanding of NetworkPolicies
 - Provide and troubleshoot access to applications via services
 - Use Ingress rules to expose applications
-### Create a pod with image nginx called nginx and expose its port 80
 
+## Contents 
+
+- [Services](#svc)
+- [Record](#record)
+
+
+## <a name="svc">Services</a>
+
+### A1 ClusterIP
+1. Create a pod with image nginx called nginx and expose its port 80
+2. Confirm that ClusterIP has been created. Also check endpoints
+3. Get service's ClusterIP, create a temp busybox pod and 'hit' that IP with wget
+4. Expose service outside of cluster using port forward
 <details><summary>show</summary>
 <p>
 
 ```bash
+#1 
 kubectl run nginx --image=nginx --restart=Never --port=80 --expose
 # observe that a pod as well as a service are created
-```
 
-</p>
-</details>
-
-
-### Confirm that ClusterIP has been created. Also check endpoints
-
-<details><summary>show</summary>
-<p>
-
-```bash
+#2
 kubectl get svc nginx # services
 kubectl get ep # endpoints
-```
 
-</p>
-</details>
-
-### Get service's ClusterIP, create a temp busybox pod and 'hit' that IP with wget
-
-<details><summary>show</summary>
-<p>
-
-```bash
+#3
 kubectl get svc nginx # get the IP (something like 10.108.93.130)
 kubectl run busybox --rm --image=busybox -it --restart=Never -- sh
 wget -O- IP:80
 exit
-```
-
-</p>
-or
-<p>
-
-```bash
+#OR
 IP=$(kubectl get svc nginx --template={{.spec.clusterIP}}) # get the IP (something like 10.108.93.130)
 kubectl run busybox --rm --image=busybox -it --restart=Never --env="IP=$IP" -- wget -O- $IP:80 --timeout 2
 # Tip: --timeout is optional, but it helps to get answer more quickly when connection fails (in seconds vs minutes)
@@ -55,6 +43,8 @@ kubectl run busybox --rm --image=busybox -it --restart=Never --env="IP=$IP" -- w
 
 </p>
 </details>
+
+
 
 ### Convert the ClusterIP to NodePort for the same service and find the NodePort port. Hit service using Node's IP. Delete the service and the pod at the end.
 
