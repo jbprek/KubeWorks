@@ -8,37 +8,64 @@
 ## Contents 
 
 - [Services](#svc)
+- [Nework Policy](#netpol)
+- [Ingress](#ingress)
 - [Record](#record)
 
 
 ## <a name="svc">Services</a>
 
-### A1 ClusterIP
-1. Create a pod with image nginx called nginx and expose its port 80
-2. Confirm that ClusterIP has been created. Also check endpoints
-3. Get service's ClusterIP, create a temp busybox pod and 'hit' that IP with wget
-4. Expose service outside of cluster using port forward
+### Setup
+
+### S1 ClusterIP DNS
+In Namespace s1
+
+1. Create a service on top of a deployment named nginx with image nginx with 3 replicas and expose its port 80. Service should be named nginx-svc
+2. Expose the deployment
+3. Confirm that ClusterIP has been created. Also check endpoints
+4. Get service's ClusterIP,
+5. Create a temp busybox pod and 'hit' that ClusterIP with wget
+6. Check from within the cluster (not from a pod) the service
+7. Create a temp busybox pod and 'hit' the service using FQDN from Core-DNS.
+8. 
 <details><summary>show</summary>
 <p>
 
 ```bash
 #1 
-kubectl run nginx --image=nginx --restart=Never --port=80 --expose
-# observe that a pod as well as a service are created
+kubectl -n s1 create deployment nginx --image nginx --replicas 3
+# check deployment replica sets
+kubectl get all -n s1
+# Expose dep as a service
+kubectl -n s1  expose deployment.apps/nginx --port 80 --name nginx-svc
 
 #2
-kubectl get svc nginx # services
+# Displays the full details including endpoints
+kubectl -n s1  describe  svc nginx-svc
+OR
+# Display the details without endpoints
+kubectl get svc nginx-svc # services
+# get endpoint details
 kubectl get ep # endpoints
 
 #3
-kubectl get svc nginx # get the IP (something like 10.108.93.130)
-kubectl run busybox --rm --image=busybox -it --restart=Never -- sh
+kubectl -n s1  get svc nginx # get the IP (something like 10.108.93.130)
+kubectl -n s1  run busybox --rm --image=busybox -it --restart=Never -- sh
 wget -O- IP:80
 exit
 #OR
-IP=$(kubectl get svc nginx --template={{.spec.clusterIP}}) # get the IP (something like 10.108.93.130)
-kubectl run busybox --rm --image=busybox -it --restart=Never --env="IP=$IP" -- wget -O- $IP:80 --timeout 2
+CLUSTER-IP=$(kubectl -n s1 get svc nginx --template={{.spec.clusterIP}}) # get the IP (something like 10.108.93.130)
+
+#5
+kubectl run busybox --image=busybox -i -- wget -O- CLUSTER-IP --timeout 2
 # Tip: --timeout is optional, but it helps to get answer more quickly when connection fails (in seconds vs minutes)
+
+#6
+# From within a terminal inside the cluster i.e minikube ssh
+curl IP
+
+#7
+kubectl run bus1 $rm --image busybox -i -- wget -O- nginx-svc.s1.svc.cluster.local
 ```
 
 </p>
@@ -46,13 +73,17 @@ kubectl run busybox --rm --image=busybox -it --restart=Never --env="IP=$IP" -- w
 
 
 
-### Convert the ClusterIP to NodePort for the same service and find the NodePort port. Hit service using Node's IP. Delete the service and the pod at the end.
+### S2 NodePort
+1.Convert Service from (S1) to NodePort for the same service
+2. Find the NodePort port. 
+3. Hit service using Node's IP. 
 
 <details><summary>show</summary>
 <p>
 
 ```bash
-kubectl edit svc nginx
+#1
+kubectl -n s1 edit svc nginx
 ```
 
 ```yaml
@@ -71,42 +102,91 @@ spec:
   - port: 80
     protocol: TCP
     targetPort: 80
+    # NOTE you can specify the port below
+    nodePort: 32100
   selector:
     run: nginx
   sessionAffinity: None
-  type: NodePort # change cluster IP to nodeport
+  type: NodePort # change Cluster IP to nodeport
 status:
   loadBalancer: {}
 ```
 
+In vi write and exit :x
+
 or
 
 ```bash
-kubectl patch svc nginx -p '{"spec":{"type":"NodePort"}}' 
+kubectl -n s1 patch svc nginx -p '{"spec":{"type":"NodePort"}}' 
 ```
 
 ```bash
-kubectl get svc
+# 2
+kubectl -n s1 get svc nginx
+OR
+kubectl -n s1 describe svc nginx
 ```
 
-```
-# result:
-NAME         TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)        AGE
-kubernetes   ClusterIP   10.96.0.1        <none>        443/TCP        1d
-nginx        NodePort    10.107.253.138   <none>        80:31931/TCP   3m
-```
 
 ```bash
 wget -O- NODE_IP:31931 # if you're using Kubernetes with Docker for Windows/Mac, try 127.0.0.1
 #if you're using minikube, try minikube ip, then get the node ip such as 192.168.99.117
+# from inside microK8s
+curl localhost:32100
+# from outside the cluster
+curl ubu1.vm:32100
 ```
 
 ```bash
 kubectl delete svc nginx # Deletes the service
-kubectl delete pod nginx # Deletes the pod
+kubectl delete deploy nginx # Deletes the pod
 ```
 </p>
 </details>
+
+
+### (S3) Service Misconfiguration
+There is a problem accessing the service nginx through curl
+1. Setup
+````bash
+kubectl create namespace s3
+kubectl -n s3 run nginx --image nginx --expose port 80
+kubectl -n s3 label pod nginx run=mynginx --overwrite
+````
+
+2. Fix the problem in the service
+3. Verify that we get the answer from the service
+4. Show log entry from the pod
+<details><summary>show</summary>
+<p>
+
+```bash
+#2
+kubectl get all -n s3
+# We can see the cluster IP of the service that is not accessible through
+curl CLUSTER-IP
+# We can check the response of the pod from a 
+kubectl run alpine --image nginx:alpine -- sh -c "sleep 7200"
+kubectl exec alpine -it -- sh
+# From the shell run curl POD-IP , shoud respond OK
+
+# Endpoint check reveals no endpoint
+kubectl -n s3 ep
+# check labels of the pod
+kubectl -n s3 get pods --show-labels
+# check service selector
+kubectl -n s3 describe svc nginx
+# There is a mismatch in the selector of the service and the pod's label
+kubectl -n s3 edit svc nginx
+
+#3 
+curl CLUSTER-IP
+#4 
+kubectl-n s3 logs pod POD-NAME 
+```
+</p>
+</details>
+
 
 ### Create a deployment called foo using image 'dgkanatsios/simpleapp' (a simple server that returns hostname) and 3 replicas. Label it as 'app=foo'. Declare that containers in this pod will accept traffic on port 8080 (do NOT create a service yet)
 
@@ -172,7 +252,9 @@ kubectl delete deploy foo
 </p>
 </details>
 
-### Create an nginx deployment of 2 replicas, expose it via a ClusterIP service on port 80. Create a NetworkPolicy so that only pods with labels 'access: granted' can access the deployment and apply it
+## <a name="netpol">Network Policy</a>
+### NP1 Network Policy
+Create an nginx deployment of 2 replicas, expose it via a ClusterIP service on port 80. Create a NetworkPolicy so that only pods with labels 'access: granted' can access the deployment and apply it
 
 kubernetes.io > Documentation > Concepts > Services, Load Balancing, and Networking > [Network Policies](https://kubernetes.io/docs/concepts/services-networking/network-policies/)
 
