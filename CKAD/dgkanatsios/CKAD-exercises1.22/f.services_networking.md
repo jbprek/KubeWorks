@@ -12,9 +12,7 @@
 - [Ingress](#ingress)
 - [Record](#record)
 
-
 ## <a name="svc">Services</a>
-
 ### Setup
 
 ### S1 ClusterIP DNS
@@ -252,22 +250,22 @@ kubectl delete deploy foo
 </p>
 </details>
 
+## <a name="ingress">Ingress</a>
+
 ## <a name="netpol">Network Policy</a>
 ### NP1 Network Policy
-Create an nginx deployment of 2 replicas, expose it via a ClusterIP service on port 80. Create a NetworkPolicy so that only pods with labels 'access: granted' can access the deployment and apply it
-
-kubernetes.io > Documentation > Concepts > Services, Load Balancing, and Networking > [Network Policies](https://kubernetes.io/docs/concepts/services-networking/network-policies/)
+Create an nginx deployment of 2 replicas, in namespace np1 expose it via a ClusterIP service on port 80. Create a NetworkPolicy so that only pods with labels 'access: granted' can access the deployment and apply it
 
 <details><summary>show</summary>
 <p>
 
 ```bash
-kubectl create deployment nginx --image=nginx --replicas=2
+kubectl -n np1 create deployment nginx --image=nginx --replicas=2
 kubectl expose deployment nginx --port=80
 
-kubectl describe svc nginx # see the 'app=nginx' selector for the pods
+kubectl -n np1 describe svc nginx # see the 'app=nginx' selector for the pods
 # or
-kubectl get svc nginx -o yaml
+kubectl -n np1 get svc nginx -o yaml
 
 vi policy.yaml
 ```
@@ -277,6 +275,7 @@ kind: NetworkPolicy
 apiVersion: networking.k8s.io/v1
 metadata:
   name: access-nginx # pick a name
+  namespace: np1
 spec:
   podSelector:
     matchLabels:
@@ -300,3 +299,98 @@ kubectl run busybox --image=busybox --rm -it --restart=Never --labels=access=gra
 
 </p>
 </details>
+
+
+### NP2 Network Policy CKAD Task weight: 9%
+
+
+
+In Namespace venus you'll find two Deployments named api and frontend. Both Deployments are exposed inside the cluster using Services. Create a NetworkPolicy named np1 which restricts outgoing tcp connections from Deployment frontend and only allows those going to Deployment api. Make sure the NetworkPolicy still allows outgoing traffic on UDP/TCP ports 53 for DNS resolution.
+
+Test using: wget www.google.com and wget api:80 from a Pod of Deployment frontend.
+
+````bash
+
+# Create backend deploy and service
+kubectl create ns venus
+kubectl -n venus create deployment api --image gcr.io/google-samples/hello-go-gke:1.0
+
+kubectl -n venus expose deployment api --port 80
+
+# Test
+kubectl -n venus run bus3 --image busybox -i $rm -- wget -O- api:2222 --timeout=2
+
+# Create frontend deploy and service
+kubectl -n venus create deployment frontend --image gcr.io/google-samples/hello-frontend:1.0
+
+kubectl -n venus expose deployment backend --port 80
+
+gcr.io/google-samples/hello-frontend:1.0
+````
+
+`````bash
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello
+spec:
+  selector:
+    app: hello
+    tier: backend
+  ports:
+  - protocol: TCP
+    port: 80
+    
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+spec:
+  selector:
+    app: hello
+    tier: frontend
+  ports:
+  - protocol: "TCP"
+    port: 80
+    targetPort: 80
+  type: LoadBalancer    
+  
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  selector:
+    matchLabels:
+      app: hello
+      tier: frontend
+      track: stable
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: hello
+        tier: frontend
+        track: stable
+    spec:
+      containers:
+        - name: nginx
+          image: "gcr.io/google-samples/hello-frontend:1.0"
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/usr/sbin/nginx","-s","quit"]  
+`````
+
+
+<details><summary>show</summary>
+<p>
+
+
+</p>
+</details>
+

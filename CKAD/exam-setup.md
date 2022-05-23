@@ -6,9 +6,12 @@ set sw=2
 set expandtab
 
 source <(kubectl completion bash)
-alias kn='kubectl config set-context --current --namespace '
+alias ksn='kubectl config set-context --current --namespace '
+alias kgn='kubectl config view | grep namespace'
 alias kgp='kubectl get po -o wide --show-labels'
-export do="--dry-run=client -o yaml"
-export rm="--restart=Never --rm -i"
-export kp="--force --grace-period=0"
+alias kga='kubectl get all'
+alias kgaw='kubectl get all -o wide --show-labels'
+export do='--dry-run=client -o yaml'
+export rm='--restart=Never --rm'
+
 ```
