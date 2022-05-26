@@ -303,33 +303,53 @@ kubectl run busybox --image=busybox --rm -it --restart=Never --labels=access=gra
 
 ### NP2 Network Policy CKAD Task weight: 9%
 
+In Namespace venus you'll find two Deployments named hello and frontend. Both Deployments are exposed inside the cluster using Services. 
+Create a NetworkPolicy named np1 which restricts outgoing tcp connections from Deployment frontend and only allows those going to Deployment hello.
+Make sure the NetworkPolicy still allows outgoing traffic on UDP/TCP ports 53 for DNS resolution.
+
+## TODO Config map exercice create backend using configmap for proxy
+Test using: wget www.google.com and wget hello:80 from a Pod of Deployment frontend.
 
 
-In Namespace venus you'll find two Deployments named api and frontend. Both Deployments are exposed inside the cluster using Services. Create a NetworkPolicy named np1 which restricts outgoing tcp connections from Deployment frontend and only allows those going to Deployment api. Make sure the NetworkPolicy still allows outgoing traffic on UDP/TCP ports 53 for DNS resolution.
+#### Setup
 
-Test using: wget www.google.com and wget api:80 from a Pod of Deployment frontend.
+Example from : https://kubernetes.io/docs/tasks/access-application-cluster/connecting-frontend-backend/
+
 
 ````bash
 
 # Create backend deploy and service
 kubectl create ns venus
-kubectl -n venus create deployment api --image gcr.io/google-samples/hello-go-gke:1.0
 
-kubectl -n venus expose deployment api --port 80
-
-# Test
-kubectl -n venus run bus3 --image busybox -i $rm -- wget -O- api:2222 --timeout=2
-
-# Create frontend deploy and service
-kubectl -n venus create deployment frontend --image gcr.io/google-samples/hello-frontend:1.0
-
-kubectl -n venus expose deployment backend --port 80
-
-gcr.io/google-samples/hello-frontend:1.0
 ````
-
-`````bash
-
+````bash
+# Backend service
+cat << EOF  > backend.yaml
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  selector:
+    matchLabels:
+      app: hello
+      tier: backend
+      track: stable
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: hello
+        tier: backend
+        track: stable
+    spec:
+      containers:
+        - name: hello
+          image: "gcr.io/google-samples/hello-go-gke:1.0"
+          ports:
+            - name: http
+              containerPort: 80
 ---
 apiVersion: v1
 kind: Service
@@ -342,22 +362,19 @@ spec:
   ports:
   - protocol: TCP
     port: 80
-    
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: frontend
-spec:
-  selector:
-    app: hello
-    tier: frontend
-  ports:
-  - protocol: "TCP"
-    port: 80
-    targetPort: 80
-  type: LoadBalancer    
-  
+    targetPort: http              
+EOF
+
+kubectl -n venus apply -f backend.yaml
+
+# Test
+kubectl -n venus run bus --image busybox -i $rm -- wget -O- hello:80 --timeout=2
+
+````
+
+`````bash
+
+cat << EOF  > frontend.yaml   
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -384,11 +401,61 @@ spec:
             preStop:
               exec:
                 command: ["/usr/sbin/nginx","-s","quit"]  
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+spec:
+  selector:
+    app: hello
+    tier: frontend
+  ports:
+  - protocol: "TCP"
+    port: 80
+    targetPort: 80
+    nodePort: 32100
+  type: NodePort 
+EOF         
+
+kubectl -n venus apply -f frontend.yaml
+
+# Test
+ curl localhost:32100 # From a node
+kubectl -n venus run bus --image busybox -i $rm -- wget -O- frontend:80 --timeout=2
 `````
 
 
 <details><summary>show</summary>
 <p>
+
+````bash
+cat << EOF > np1.yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: np1
+  namespace: venus
+spec:
+  podSelector:
+    matchLabels:
+      tier: frontend
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              tier: backend
+      ports:
+        - protocol: TCP
+          port: 53
+        - protocol: UDP
+          port: 53
+EOF
+
+kubectl apply -f np1.yaml
+````
 
 
 </p>
