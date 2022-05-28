@@ -15,7 +15,7 @@
 ## <a name="svc">Services</a>
 ### Setup
 
-### S1 ClusterIP DNS
+### SVC.1 ClusterIP DNS
 In Namespace s1
 
 1. Create a service on top of a deployment named nginx with image nginx with 3 replicas and expose its port 80. Service should be named nginx-svc
@@ -25,7 +25,7 @@ In Namespace s1
 5. Create a temp busybox pod and 'hit' that ClusterIP with wget
 6. Check from within the cluster (not from a pod) the service
 7. Create a temp busybox pod and 'hit' the service using FQDN from Core-DNS.
-8. 
+
 <details><summary>show</summary>
 <p>
 
@@ -71,7 +71,7 @@ kubectl run bus1 $rm --image busybox -i -- wget -O- nginx-svc.s1.svc.cluster.loc
 
 
 
-### S2 NodePort
+### SVC.2 NodePort
 1.Convert Service from (S1) to NodePort for the same service
 2. Find the NodePort port. 
 3. Hit service using Node's IP. 
@@ -143,7 +143,7 @@ kubectl delete deploy nginx # Deletes the pod
 </details>
 
 
-### (S3) Service Misconfiguration
+### SVC.3  Service Misconfiguration
 There is a problem accessing the service nginx through curl
 1. Setup
 ````bash
@@ -186,74 +186,53 @@ kubectl-n s3 logs pod POD-NAME
 </details>
 
 
-### Create a deployment called foo using image 'dgkanatsios/simpleapp' (a simple server that returns hostname) and 3 replicas. Label it as 'app=foo'. Declare that containers in this pod will accept traffic on port 8080 (do NOT create a service yet)
+### SVC.4 Deployment/Service 
+In namespace s4
+1.Create a deployment 
+    1.called foo 
+    2. using image 'jbprek/hello-from-ip'
+    3. replicas. 
+    5. Declare that containers in this pod will accept traffic on port 8080 
+2. Test Deployment
+   1. Get the pod IPs.
+   2. Create a temp busybox pod and try hitting them on port 8080
+3. Create a service that exposes the deployment on port 6262. Verify its existence, check the endpoints
+4. Verify that each time there's a different hostname returned. 
+5. Delete namespace to cleanup the cluster
+ 
 
 <details><summary>show</summary>
 <p>
 
 ```bash
-kubectl create deploy foo --image=dgkanatsios/simpleapp --port=8080 --replicas=3
-kubectl label deployment foo --overwrite app=foo
-```
-</p>
-</details>
+# 1
+kubectl create ns s4
+kubectl -n s4 create deploy foo --image=jbprek/hello-from-ip --port=8080 --replicas=3
 
-### Get the pod IPs. Create a temp busybox pod and try hitting them on port 8080
-
-<details><summary>show</summary>
-<p>
-
-
-```bash
+# 2
 kubectl get pods -l app=foo -o wide # 'wide' will show pod IPs
-kubectl run busybox --image=busybox --restart=Never -it --rm -- sh
-wget -O- POD_IP:8080 # do not try with pod name, will not work
-# try hitting all IPs to confirm that hostname is different
-exit
-# or
-kubectl get po -o wide -l app=foo | awk '{print $6}' | grep -v IP | xargs -L1 -I '{}' kubectl run --rm -ti tmp --restart=Never --image=busybox -- wget -O- http://\{\}:8080
+kubectl run bus2 -n s4 --image busybox $rm -i -- wget -O- http://POD_IP:8080/hello
+
 ```
-
-</p>
-</details>
-
-### Create a service that exposes the deployment on port 6262. Verify its existence, check the endpoints
-
-<details><summary>show</summary>
-<p>
-
 
 ```bash
-kubectl expose deploy foo --port=6262 --target-port=8080
-kubectl get service foo # you will see ClusterIP as well as port 6262
-kubectl get endpoints foo # you will see the IPs of the three replica nodes, listening on port 8080
+# 3
+kubectl -n s4  expose deploy foo --port=6262 --target-port=8080
+kubectl -n s4  get service foo # you will see ClusterIP as well as port 6262
+kubectl -n s4 get ep foo # you will see the IPs of the three replica nodes, listening on port 8080
 ```
-
-</p>
-</details>
-
-### Create a temp busybox pod and connect via wget to foo service. Verify that each time there's a different hostname returned. Delete deployment and services to cleanup the cluster
-
-<details><summary>show</summary>
-<p>
 
 ```bash
-kubectl get svc # get the foo service ClusterIP
-kubectl run busybox --image=busybox -it --rm --restart=Never -- sh
-wget -O- foo:6262 # DNS works! run it many times, you'll see different pods responding
-wget -O- SERVICE_CLUSTER_IP:6262 # ClusterIP works as well
-# you can also kubectl logs on deployment pods to see the container logs
-kubectl delete svc foo
-kubectl delete deploy foo
+# 4 
+kubectl delete ns s4
 ```
-
 </p>
 </details>
 
 ## <a name="ingress">Ingress</a>
 
 ## <a name="netpol">Network Policy</a>
-### NP1 Network Policy
+### NP.1 Network Policy
 Create an nginx deployment of 2 replicas, in namespace np1 expose it via a ClusterIP service on port 80. Create a NetworkPolicy so that only pods with labels 'access: granted' can access the deployment and apply it
 
 <details><summary>show</summary>
@@ -301,7 +280,7 @@ kubectl run busybox --image=busybox --rm -it --restart=Never --labels=access=gra
 </details>
 
 
-### NP2 Network Policy CKAD Task weight: 9%
+### NP.2 Network Policy CKAD Task weight: 9%
 
 In Namespace venus you'll find two Deployments named hello and frontend. Both Deployments are exposed inside the cluster using Services. 
 Create a NetworkPolicy named np1 which restricts outgoing tcp connections from Deployment frontend and only allows those going to Deployment hello.
