@@ -1,4 +1,12 @@
 # Application  Environment, Configuration  and  Security 25%
+- 
+- Discover and use resources that extend Kubernetes (CRD)
+- Understand authentication, authorization and admission control
+- Understanding and defining resource requirements, limits and quotas
+- Understand ConfigMaps
+- Create & consume Secrets
+- Understand ServiceAccounts
+- Understand SecurityContexts
 
 ## TODO Discover and use resources that extend Kubernetes  (CRD)
 ## TODO Understand  authentication,  authorization and  admission  control
@@ -6,24 +14,19 @@
 
 kubernetes.io > Documentation > Tasks > Configure Pods and Containers > [Configure a Pod to Use a ConfigMap](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/)
 
-### Create a configmap named conf_from_lit with values foo=lala,foo2=lolo
+### CM.1 ConfigMap Literal Values
+1. In namespce cm create a configmap named conf_from_lit with values foo=lala,foo2=lolo
+2. Display its values
 
 <details><summary>show</summary>
 <p>
 
 ```bash
-kubectl create cm conf-from-lit --from-literal=foo=lala --from-literal=foo2=lolo
-```
+# 1
+kubectlcreate ns cm
+kubectl -n cm create cm conf-from-lit --from-literal=foo=lala --from-literal=foo2=lolo
 
-</p>
-</details>
-
-### Display its values
-
-<details><summary>show</summary>
-<p>
-
-```bash
+# 2
 kubectl get cm conf-from-lit -o yaml
 # or
 kubectl describe conf-from-lit config1
@@ -32,26 +35,30 @@ kubectl describe conf-from-lit config1
 </p>
 </details>
 
-### Create and display a configmap conf-from-file from a file
+### CM.2  ConfigMap from File
 
-Create the file with
+1. Create and display a configmap conf-from-file from a file
+2. Display its values
+
+- Setup
 
 ```bash
 echo -e "foo3=lili\nfoo4=lele" > config2.txt
 ```
-
 <details><summary>show</summary>
 <p>
 
 ```bash
+# 1
 kubectl create cm conf-from-file --from-file=config2.txt
+# 2
 kubectl get cm conf-from-file -o yaml
 ```
 
 </p>
 </details>
 
-### Create and display a configmap named cm conf-from-env-file from a .env file
+### CM.3 Create and display a configmap named cm conf-from-env-file from a .env file
 
 Note: Substitute for --from-literal
 
@@ -73,7 +80,7 @@ kubectl get cm conf-from-env-file -o yaml
 </p>
 </details>
 
-### Create and display a configmap named conf-from-file-key  from a file, giving the key 'special'
+### CM.4 Create and display a configmap named conf-from-file-key  from a file, giving the key 'special'
 
 Create the file with
 
@@ -93,7 +100,7 @@ kubectl get cm conf-from-file-key -o yaml
 </p>
 </details>
 
-###  Create a new nginx pod that loads the value from variable 'var2', from conf-from-env-file  in an env variable called 'VAR2'
+### CM.5 Create a new nginx pod that loads the value from variable 'var2', from conf-from-env-file  in an env variable called 'VAR2'
 
 <details><summary>show</summary>
 <p>
@@ -143,7 +150,7 @@ kubectl exec -t nginx1 -- env | grep VAR2 # will show 'VAR2=val2'
 </p>
 </details>
 
-###  Load conf-from-env-file CM as env variables into a new nginx pod named nginx2
+###  CM.6 Load conf-from-env-file CM as env variables into a new nginx pod named nginx2
 <details><summary>show</summary>
 <p>
 
@@ -184,7 +191,7 @@ kubectl exec -t nginx2 -- env
 </p>
 </details>
 
-### Create a configMap 'cmvolume' with values 'var8=val8', 'var9=val9'. Load this as a volume inside an nginx pod on path '/etc/lala'. Create the pod and 'ls' into the '/etc/lala' directory.
+### CM.7 Create a configMap 'cmvolume' with values 'var8=val8', 'var9=val9'. Load this as a volume inside an nginx pod on path '/etc/lala'. Create the pod and 'ls' into the '/etc/lala' directory.
 
 <details><summary>show</summary>
 <p>
@@ -306,7 +313,7 @@ cat var8 # will show val8
 </details>
 
 
-### CKAD -Question 15 | ConfigMap, Configmap-Volume
+### CM.8 CKAD -Question 15 | ConfigMap, Configmap-Volume 5%
 Team Moonpie has a nginx server Deployment called web-moon in Namespace moon. Someone started configuring it but it was never completed. To complete please create a ConfigMap called configmap-web-moon-html containing the content of file /opt/course/15/web-moon.html under the data key-name index.html.
 
 The Deployment web-moon is already configured to work with this ConfigMap and serve its content. Test the nginx configuration for example using curl from a temporary nginx:alpine Pod.
