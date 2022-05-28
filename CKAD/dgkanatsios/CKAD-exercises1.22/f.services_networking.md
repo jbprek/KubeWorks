@@ -282,7 +282,7 @@ kubectl run busybox --image=busybox --rm -it --restart=Never --labels=access=gra
 
 ### NP.2 Network Policy CKAD Task weight: 9%
 
-Example [From]( https://kubernetes.io/docs/tasks/access-application-cluster/connecting-frontend-backend/)
+Example (From)[ https://kubernetes.io/docs/tasks/access-application-cluster/connecting-frontend-backend/]
 
 In Namespace venus you'll find two Deployments named hello and frontend. Both Deployments are exposed inside the cluster using Services. 
 Create a NetworkPolicy named np1 which restricts outgoing tcp connections from Deployment frontend and only allows those going to Deployment hello.
