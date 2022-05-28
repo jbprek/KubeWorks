@@ -1,5 +1,5 @@
 # Application  Environment, Configuration  and  Security 25%
-- 
+
 - Discover and use resources that extend Kubernetes (CRD)
 - Understand authentication, authorization and admission control
 - Understanding and defining resource requirements, limits and quotas
