@@ -22,12 +22,13 @@ Question 13 | Storage, StorageClass, PVC  Task weight: 6%
 
 ## <a name="docker-podman">Define, build and modify container images</a>
 **Define, build and modify container images**
-### Run httpd detached container, mount volume with html content
+### D.1 Run httpd detached container, mount volume with html content
 - Before : Run the following commands
 ````bash
 # Setup a webpage
 mkdir -p ~/dummy/webfiles
 echo "Hello From Docker!" > ~/dummy/webfiles/index.html
+cd  ~/dummy/webfiles; export WDIR=$(pwd); cd - ;
  ````
 
 1. Create a container in detached mode
@@ -58,8 +59,8 @@ rm -rf ~/dummy/webfiles
 </p>
 </details>
 
-### Create container connect interactively (GVS)
-1. Run the latest version of Ubuntu in container in interactive mode starting a bash shell and explore the/etc/os-release file as well the kernel version uname -r
+## D.2 Create container connect interactively (GVS)
+1. Run 20.04 version of Ubuntu in container in interactive mode starting a bash shell and explore the/etc/os-release file as well the kernel version uname -r
 2. Disconnect from the container without shutting it down (Detach)
 3. Reconnect to the shell created in (1)
 4. Create a new shell connecting to the container using exec, exit from the shell
@@ -90,7 +91,7 @@ docker rm ubuntu
 </p>
 </details>
 
-### Container inspection
+### D.3 Container inspection
  Run a container in detached mode using image nginx find it's IP address
 
 <details><summary>show</summary>
@@ -112,7 +113,7 @@ docker inspect b31c87385e0a | grep IPAddress
 </p>
 </details>
 
-### Run Container using environment variable check logs
+### D.4 Run Container using environment variable check logs
 
 Issue the following command and inspect and fix the problem
 
@@ -143,42 +144,61 @@ docker run --name=mydb  -d -e MARIADB_ROOT_PASSWORD=changeme mariadb
 </p>
 </details>
 
-###  Container Image (nginx with custom web content)
+###  D.5 Build tab container image
+
+
 - Before : Run the following commands
 ````bash
-# Setup a webpage
-mkdir -p ~/dummy/nginxproject/webfiles
-echo "Hello From Docker!" > ~/dummy/nginxproject/webfiles/index.html
- ````
 
+mkdir -p ~/dummy/docker-project
+cat << EOF > ~/dummy/docker-project/Dockerfile
+FROM busybox:latest
+MAINTAINER jp
+CMD /bin/sh -c "echo hello"
+EOF
+
+cd ~/dummy/docker-project
+ ````
+1. Build the image in ~/dummy/docker-project as  bus1:1.0
+   1. Test the container
+   2. Delete the container
+2. Tag the image generated in (1) as bus1:latest
+   1. Test the container
+   2. Delete the container
+3. Repeat the 2 steps above in a single command produce images bus2:1.0 bus2:latest
+   1. Test the container
+   2. Delete the container
+4. Delete the images
 
 <details><summary>show</summary>
 <p>
 
 ````bash
- docker run --name=mydb  -d mariadb
- # Docker ps shows that the container is not running
- docker ps
- # Inspect the logs
- docker logs mydb
- # Output 
-  docker logs mydb
-2022-05-07 12:47:12+00:00 [Note] [Entrypoint]: Entrypoint script for MariaDB Server 1:10.7.3+maria~focal started.
-2022-05-07 12:47:12+00:00 [Note] [Entrypoint]: Switching to dedicated user 'mysql'
-2022-05-07 12:47:12+00:00 [Note] [Entrypoint]: Entrypoint script for MariaDB Server 1:10.7.3+maria~focal started.
-2022-05-07 12:47:12+00:00 [ERROR] [Entrypoint]: Database is uninitialized and password option is not specified
-        You need to specify one of MARIADB_ROOT_PASSWORD, MARIADB_ALLOW_EMPTY_ROOT_PASSWORD and MARIADB_RANDOM_ROOT_PASSWORD
-        
-# Remove the existing container
-docker rm mydb 
-# Issue the right command
-docker run --name=mydb  -d -e MARIADB_ROOT_PASSWORD=changeme mariadb     
+#1 
+ docker build -t bus1:1.0 . 
+#1.1
+docker run --name bus1 bus1:1.0
+#1.2 
+docker rm bus1
+#2.
+docker tag bus1:1.0 bus1:latest
+#2.1
+docker run --name bus1 bus1
+#1.2 
+docker rm bus1
+#3
+ docker build -t bus2:1.0 -t bus2:latest . 
+#3.1
+docker run --name bus2 bus2
+#3.2 
+docker rm bus2
+
 ````
 </p>
 </details>
 
 ## <a name="jobs">Jobs</a>
-###  Quiz - Describe the 3 different types of jobs
+###  JQ.1. Quiz - Describe the 3 different types of jobs
 
 <details><summary>show</summary>
 <p>
@@ -205,7 +225,7 @@ docker run --name=mydb  -d -e MARIADB_ROOT_PASSWORD=changeme mariadb
 
 
 ## <a name="jobs">Jobs</a>
-###  Quiz - Describe the job parameters for
+###  JQ.2 Quiz - Describe the job parameters for
 1. Maximum time to be consumed in a job
 2. Maximum time for the job to be retained once completed
 
