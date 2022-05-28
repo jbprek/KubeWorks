@@ -15,7 +15,7 @@
 kubernetes.io > Documentation > Tasks > Configure Pods and Containers > [Configure a Pod to Use a ConfigMap](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/)
 
 ### CM.1 ConfigMap Literal Values
-1. In namespce cm create a configmap named conf_from_lit with values foo=lala,foo2=lolo
+1. In namespce cm create a configmap named conf-from-lit with values foo=lala,foo2=lolo
 2. Display its values
 
 <details><summary>show</summary>
