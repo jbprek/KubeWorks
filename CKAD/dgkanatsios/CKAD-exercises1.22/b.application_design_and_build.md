@@ -368,7 +368,7 @@ status: {}
 </p>
 </details>
 
-### J.5 Create the same job, make it run 5 times, one after the other. Verify its status and delete it
+### J.4 Create the same job, make it run 5 times, one after the other. Verify its status and delete it
 
 <details><summary>show</summary>
 <p>
@@ -422,7 +422,7 @@ kubectl delete jobs busybox
 </p>
 </details>
 
-### J6. Create the same job, but make it run 5 parallel times
+### J.5 Create the same job, but make it run 5 parallel times
 
 <details><summary>show</summary>
 <p>
