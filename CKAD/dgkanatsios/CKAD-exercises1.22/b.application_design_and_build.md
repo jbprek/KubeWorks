@@ -770,7 +770,7 @@ Check if the logs of the new container reveal something about the missing data i
 #### Setup
 ```bash
 
-cat << EOF > ~/mcp//cleaner.yml
+cat << EOF > ~/mcp/cleaner.yml
 
 apiVersion: apps/v1
 kind: Deployment
