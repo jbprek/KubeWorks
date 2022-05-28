@@ -291,8 +291,8 @@ kubectl delete job pi
 </p>
 </details>
 
-### JOB.2. Job creation, monitor, logging 
-1. Create a job with the image busybox that executes the command 'echo hello;sleep 30;echo world'
+### JOB.2 Job creation, monitor, logging 
+1. Create a job named busjob with the image busybox that executes the command 'echo hello;sleep 30;echo world'
 2. Follow the logs for the pod (you'll wait for 30 seconds)
 3. See the status of the job, describe it and see the logs
 4. Delete the job
@@ -368,8 +368,11 @@ status: {}
 </p>
 </details>
 
-### JOB.4 Create the same job, make it run 5 times, one after the other. Verify its status and delete it
-
+### JOB.4 Create a job, make it run 5 times, one after the other. Verify its status and delete it
+1. Create a job named bus5times with the image busybox that executes the command 'echo "run at $(date)";sleep 5'
+2. Follow the logs for the pod (you'll wait for 30 seconds)
+3. See the status of the job, describe it and see the logs
+4. Delete the job
 <details><summary>show</summary>
 <p>
 
@@ -479,24 +482,19 @@ kubectl delete job busybox
 
 kubernetes.io > Documentation > Tasks > Run Jobs > [Running Automated Tasks with a CronJob](https://kubernetes.io/docs/tasks/job/automated-tasks-with-cron-jobs/)
 
-### Create a cron job with image busybox that runs on a schedule of "*/1 * * * *" and writes 'date; echo Hello from the Kubernetes cluster' to standard output
-
+### CRON.1 Cron Job  Creation
+1. In namespace jobs create a cron job with:
+   1. image busybox in namespace jobs
+   2. that runs on a schedule of "*/1 * * * *" 
+   3. and writes 'date; echo Hello from the Kubernetes cluster' to standard output
+2. See its logs and delete it
 <details><summary>show</summary>
 <p>
 
 ```bash
-kubectl create cronjob busybox --image=busybox --schedule="*/1 * * * *" -- /bin/sh -c 'date; echo Hello from the Kubernetes cluster'
-```
+kubectl -n jobs create cronjob busybox --image=busybox --schedule="*/1 * * * *" -- /bin/sh -c 'date; echo Hello from the Kubernetes cluster'
 
-</p>
-</details>
-
-### See its logs and delete it
-
-<details><summary>show</summary>
-<p>
-
-```bash
+#2
 kubectl get cj
 kubectl get jobs --watch
 kubectl get po --show-labels # observe that the pods have a label that mentions their 'parent' job
@@ -508,7 +506,13 @@ kubectl delete cj busybox
 </p>
 </details>
 
-### Create a cron job with image busybox that runs every minute and writes 'date; echo Hello from the Kubernetes cluster' to standard output. The cron job should be terminated if it takes more than 17 seconds to start execution after its scheduled time (i.e. the job missed its scheduled time).
+
+###  CRON.2 Cron Job  Creation - Forced termination on missing schedule time
+1. In namespace jobs create a cron job 
+   1. with image busybox 
+   2. that runs every minute 
+   3. nd writes 'date; echo Hello from the Kubernetes cluster' to standard output. 
+   4. The cron job should be terminated if it takes more than 17 seconds to start execution after its scheduled time (i.e. the job missed its scheduled time).
 
 <details><summary>show</summary>
 <p>
@@ -552,7 +556,8 @@ status: {}
 </p>
 </details>
 
-### Create a cron job with image busybox that runs every minute and writes 'date; echo Hello from the Kubernetes cluster' to standard output. The cron job should be terminated if it successfully starts but takes more than 12 seconds to complete execution.
+### CRON.3 Cron Job  Creation - Forced termination on exceeding a time to complete execution
+Create a cron job with image busybox that runs every minute and writes 'date; echo Hello from the Kubernetes cluster' to standard output. The cron job should be terminated if it successfully starts but takes more than 12 seconds to complete execution.
 
 <details><summary>show</summary>
 <p>
@@ -601,7 +606,8 @@ status: {}
 
 Exercises in ns mcp dir ~/mcp
 
-### 1. Create a Pod with two containers, both with image busybox and command "echo hello; sleep 3600". Connect to the second container and run 'ls'
+### MCP.1. Multi Container Pod creation
+In namespece mcp, create a Pod with two containers, both with image busybox and command "echo hello; sleep 3600". Connect to the second container and run 'ls'
 
 <details><summary>show</summary>
 <p>
@@ -650,7 +656,7 @@ kubectl delete po busybox
 </p>
 </details>
 
-### 2. Init Container 
+### MCP.2 Init Container 
 Create pod with :
 - nginx container exposed at port 80. 
 - Add a busybox init container which downloads a page using "wget -O /work-dir/index.html http://neverssl.com/online". 
@@ -750,7 +756,7 @@ kubectl delete po box
 </details>
 
 
-### 3. CKAD Question 16 | Logging sidecar 6%
+### MCP.3 CKAD Question 16 | Logging sidecar 6%
 
 In namespace mcp
 . There is an existing container named cleaner-con in Deployment cleaner in Namespace mcp. This container mounts a volume and writes logs into a file called cleaner.log.
