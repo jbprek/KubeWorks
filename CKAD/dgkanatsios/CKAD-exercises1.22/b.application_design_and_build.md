@@ -770,7 +770,9 @@ Check if the logs of the new container reveal something about the missing data i
 #### Setup
 ```bash
 
-cat << EOF > ~/mcp//cleaner.yml
+mkdir -p ~/mcp
+
+cat << EOF > ~/mcp/cleaner.yml
 
 apiVersion: apps/v1
 kind: Deployment
@@ -806,7 +808,7 @@ spec:
           mountPath: /var/log/cleaner
 EOF
 
-kubectl apply -f ~/mcp/cleaner.yml
+kubectl apply -n mcp -f ~/mcp/cleaner.yml
 ```
 
 #### Cleanup
@@ -820,7 +822,7 @@ kubectl delete ns mcp
 
 
 ```bash
-cp dummy/cleanup.yml dummy/cleanup-new.yml
+cp mcp/cleanup.yml mcp/cleanup-new.yml
 ```
 
 Edit cleanup-new.yml as follows 
@@ -831,7 +833,7 @@ kind: Deployment
 metadata:
    creationTimestamp: null
    name: cleaner
-   namespace: mercury
+   namespace: mcp
 spec:
    replicas: 2
    selector:
@@ -871,14 +873,14 @@ spec:
 
 ```bash
 # Apply changes
-kubectl apply -f cleanup-new.yml
+kubectl apply -n mcp -f cleanup-new.yml
 # Check deployment progress
 
-kubectl -n mercury rollout history deploy cleaner
-kubectl -n mercury rollout history deploy cleaner --revision 1
-kubectl -n mercury rollout history deploy cleaner --revision 2
+kubectl -n mcp rollout history deploy cleaner
+kubectl -n mcp rollout history deploy cleaner --revision 1
+kubectl -n mcp rollout history deploy cleaner --revision 2
 # See the logs of a pod's logger container
-kubectl -n mercury logs cleaner-799bf8b767-24r6z -c logger-con
+kubectl -n mcp logs cleaner-799bf8b767-24r6z -c logger-con
 ```
 
 
@@ -892,7 +894,7 @@ kubernetes.io > Documentation > Tasks > Configure Pods and Containers > [Configu
 
 All exercises on namespace pers
 
-### PersistentVolume
+### PV.1 PersistentVolume
 Create a PersistentVolume:
 1. 1Gi
 2. name 'myvolume'. 
@@ -936,7 +938,7 @@ kubectl get pv
 </p>
 </details>
 
-### PersistentVolumeClaim
+### PV.2 PersistentVolumeClaim
 
 Create a PersistentVolumeClaim for this storage class:
 1. called 'mypvc', 
@@ -984,7 +986,7 @@ kubectl get pv # will show as 'Bound' as well
 </p>
 </details>
 
-### Pod Using PVC
+### PV.3 Pod Using PVC
 Create a busybox pod 
 1. with command 'sleep 3600', 
 2. save it on pod.yaml. 
