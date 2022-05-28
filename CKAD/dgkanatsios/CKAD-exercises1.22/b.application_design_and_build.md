@@ -1050,7 +1050,7 @@ kubectl exec busybox -it -- cp /etc/passwd /etc/foo/passwd
 </p>
 </details>
 
-### Storage, StorageClass, PVC CKAD 6%
+### PV.4 Storage, StorageClass, PVC CKAD 6%
 Team Moonpie, which has the Namespace moon, needs more storage.
 
 A. Create a new Storage class using:
