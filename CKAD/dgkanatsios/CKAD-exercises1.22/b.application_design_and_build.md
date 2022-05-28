@@ -249,7 +249,7 @@ docker rm bus2
 
 
 
-### J.1. Job creation, monitor, logging
+### JOB.1. Job creation, monitor, logging
 A. Create a job 
 1. named pi with 
 2. image perl that 
@@ -291,7 +291,7 @@ kubectl delete job pi
 </p>
 </details>
 
-### J.2. Job creation, monitor, logging 
+### JOB.2. Job creation, monitor, logging 
 1. Create a job with the image busybox that executes the command 'echo hello;sleep 30;echo world'
 2. Follow the logs for the pod (you'll wait for 30 seconds)
 3. See the status of the job, describe it and see the logs
@@ -323,7 +323,7 @@ kubectl delete job busybox
 </p>
 </details>
 
-### J.3 Create a job but ensure that it will be automatically terminated by kubernetes if it takes more than 30 seconds to execute
+### JOB.3 Create a job but ensure that it will be automatically terminated by kubernetes if it takes more than 30 seconds to execute
 1. image busybox that executes the command 'while true; do echo hello; sleep 10;done'
 2. Follow the logs for the pod (you'll wait for 30 seconds)
 3. See the status of the job, describe it and see the logs
@@ -368,7 +368,7 @@ status: {}
 </p>
 </details>
 
-### J.4 Create the same job, make it run 5 times, one after the other. Verify its status and delete it
+### JOB.4 Create the same job, make it run 5 times, one after the other. Verify its status and delete it
 
 <details><summary>show</summary>
 <p>
@@ -422,7 +422,7 @@ kubectl delete jobs busybox
 </p>
 </details>
 
-### J.5 Create the same job, but make it run 5 parallel times
+### JOB.5 Create the same job, but make it run 5 parallel times
 
 <details><summary>show</summary>
 <p>
