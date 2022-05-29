@@ -285,7 +285,7 @@ kubectl run busybox --image=busybox --rm -it --restart=Never --labels=access=gra
 Example (From)[ https://kubernetes.io/docs/tasks/access-application-cluster/connecting-frontend-backend/]
 
 In Namespace venus you'll find two Deployments named hello and frontend. Both Deployments are exposed inside the cluster using Services. 
-Create a NetworkPolicy named np1 which restricts outgoing tcp connections from Deployment frontend and only allows those going to Deployment hello.
+Create a NetworkPolicy named np1 which restricts outgoing tcp connections from Deployment front-end and only allows those going to Deployment hello.
 Make sure the NetworkPolicy still allows outgoing traffic on UDP/TCP ports 53 for DNS resolution.
 
 ## TODO Config map exercice create backend using configmap for proxy
@@ -294,16 +294,11 @@ Test using: wget www.google.com and wget hello:80 from a Pod of Deployment front
 
 #### Setup
 
-Example from : https://kubernetes.io/docs/tasks/access-application-cluster/connecting-frontend-backend/
+
 
 
 ````bash
-
-# Create backend deploy and service
 kubectl create ns venus
-
-````
-````bash
 # Backend service
 cat << EOF  > backend.yaml
 ---
@@ -348,63 +343,73 @@ EOF
 
 kubectl -n venus apply -f backend.yaml
 
-# Test
-kubectl -n venus run bus --image busybox -i $rm -- wget -O- hello:80 --timeout=2
+# Create front-end 
 
-````
+cat << EOF  > front-end-nginx.conf
+# The identifier Backend is internal to nginx, and used to name this specific upstream
+upstream Backend {
+    # hello is the internal DNS name used by the backend Service inside Kubernetes
+    server hello;
+}
 
-`````bash
+server {
+    listen 80;
 
-cat << EOF  > frontend.yaml   
----
+    location / {
+        # The following statement will proxy traffic to the upstream named Backend
+        proxy_pass http://Backend;
+    }
+}
+EOF
+
+kubectl -n venus create cm front-end-cm --from-file=front-end-nginx.conf
+
+cat << EOF > front-end.yml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: frontend
+  labels:
+    app: front-end
+  name: front-end
+  namespace: venus
 spec:
+  replicas: 2
   selector:
     matchLabels:
-      app: hello
-      tier: frontend
-      track: stable
-  replicas: 1
+      app: front-end
+  strategy: { }
   template:
     metadata:
       labels:
-        app: hello
-        tier: frontend
-        track: stable
+        app: front-end
     spec:
       containers:
-        - name: nginx
-          image: "gcr.io/google-samples/hello-frontend:1.0"
-          lifecycle:
-            preStop:
-              exec:
-                command: ["/usr/sbin/nginx","-s","quit"]  
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: frontend
-spec:
-  selector:
-    app: hello
-    tier: frontend
-  ports:
-  - protocol: "TCP"
-    port: 80
-    targetPort: 80
-    nodePort: 32100
-  type: NodePort 
-EOF         
+        - image: nginx:alpine
+          name: front-end
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/nginx/conf.d
+          resources: { }
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      volumes:
+        - name: config-volume
+          configMap:
+            name: front-end-cm
+EOF
 
-kubectl -n venus apply -f frontend.yaml
+kubectl -n venus apply -f front-end.yml
 
-# Test
- curl localhost:32100 # From a node
-kubectl -n venus run bus --image busybox -i $rm -- wget -O- frontend:80 --timeout=2
-`````
+kubectl -n venus expose deployment.apps/front-end  --port=80
+````
+
+
+```bash
+# Test backend
+kubectl -n venus run bus --image busybox -i $rm -- wget -O- hello:80 --timeout 2
+# Test front-end
+kubectl -n venus run bus --image busybox -i $rm -- wget -O- front-end:80 --timeout 2
+```
 
 
 <details><summary>show</summary>
@@ -420,15 +425,18 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-      tier: frontend
+      app: front-end
   policyTypes:
     - Egress
   egress:
     - to:
         - podSelector:
             matchLabels:
-              tier: backend
-      ports:
+              app: hello
+# Please note the difference if in the below leading (-) in from of ports was missing
+# Current rule is (target has label app:hello) OR ( ports in 53)
+# With missing (-) is  (target has label app:hello) AND ( ports in 53)             
+    - ports:
         - protocol: TCP
           port: 53
         - protocol: UDP
