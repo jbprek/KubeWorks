@@ -230,6 +230,63 @@ kubectl delete ns s4
 </details>
 
 ## <a name="ingress">Ingress</a>
+### ING.1 Simple rule
+### Setup
+- Make sure an ingress addons is available
+- make sure that IP of the cluster is accessible through DNS
+
+```bash
+kubectl create ns ing
+kubectl -n ing create deployment nginx --image=nginx --port=80  --replicas 3
+kubectl -n ing expose deployment nginx --port=8080 --target-port=80
+kubectl create ns ing2
+kubectl -n ing2 create deployment apache --image=httpd --port=80 --replicas 3
+kubectl -n ing2 expose deployment apache --port=8080 -target-port=80
+```
+
+### Cleanup
+```bash
+kubectl -n ing svc nginx
+kubectl -n ing delete deployment nginx
+kubectl -n ing2 svc httpd
+kubectl -n ing2 delete deployment apache
+kubectl delete ns ing
+kubectl delete ns ing2
+```
+
+
+There are 2 services in the cluster 
+- one is exposed in ing namespace named nginx
+- the second in ing2 namespace named apache
+
+Expose through ingress 
+- nginx under external url /hello
+- apache under external url /goodbye
+
+<details><summary>show</summary>
+<p>
+
+```bash
+# 1
+
+kubectl -n ing create ingress simple --rule="ubu1.info/hello=nginx:8080"
+
+```
+
+```bash
+# 3
+kubectl -n s4  expose deploy foo --port=6262 --target-port=8080
+kubectl -n s4  get service foo # you will see ClusterIP as well as port 6262
+kubectl -n s4 get ep foo # you will see the IPs of the three replica nodes, listening on port 8080
+```
+
+```bash
+# 4 
+kubectl delete ns s4
+```
+</p>
+</details>
+
 
 ## <a name="netpol">Network Policy</a>
 ### NP.1 Network Policy
@@ -293,9 +350,6 @@ Test using: wget www.google.com and wget hello:80 from a Pod of Deployment front
 
 
 #### Setup
-
-
-
 
 ````bash
 kubectl create ns venus
@@ -433,7 +487,7 @@ spec:
         - podSelector:
             matchLabels:
               app: hello
-# Please note the difference if in the below leading (-) in from of ports was missing
+# Please note the difference if in the below leading (-) in front of ports was missing
 # Current rule is (target has label app:hello) OR ( ports in 53)
 # With missing (-) is  (target has label app:hello) AND ( ports in 53)             
     - ports:
