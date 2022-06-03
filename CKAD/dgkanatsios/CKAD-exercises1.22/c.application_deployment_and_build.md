@@ -526,7 +526,7 @@ kubectl delete deploy/nginx hpa/nginx
 ```
 </p></details>
 
-## <a name="Helo">Helm Management</a>
+## <a name="Helm">Helm Management</a>
 
 ### H0 List the basic entities of Helm
 
