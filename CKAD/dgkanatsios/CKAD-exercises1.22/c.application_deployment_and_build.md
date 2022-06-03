@@ -528,7 +528,6 @@ kubectl delete deploy/nginx hpa/nginx
 
 ## <a name="Helm">Helm Management</a>
 
-### H0 List the basic entities of Helm
 
 ### H0 List the basic entities of Helm
 
@@ -541,6 +540,8 @@ kubectl delete deploy/nginx hpa/nginx
 
 </p></details>
 
+
+
 ### H1 Repository basic operations
 1. Add repository kubernetes-dashboard with URL https://kubernetes.github.io/dashboard/
 2. List repositories
@@ -548,6 +549,7 @@ kubectl delete deploy/nginx hpa/nginx
 4. Delete repository kubernetes-dashboard
 5. Search repository for artifact nginx
 6. List everything in bitnami repository
+7. Search repository for artifact nginx list all versions
 
 <details><summary>show</summary><p>
 
@@ -568,29 +570,56 @@ helm search repo bitnami
 </p></details>
 
 ### H2 Release Helm basic operations
+In namespace hel2
 1. Deploy chart nginx with generated name
 2. List currently installed charts
-3. Delete previous installed release
-
-
+3. Delete  installed release in (1)
+4. Deploy chart nginx, named nginx-release-latest 
+5. Deploy chart nginx, version 11.1.5, named nginx-release-11-1-5
+6. Upgrade release nginx-release-11-1-5 to the latest nginx chart
 <details><summary>show</summary><p>
 
 ```bash
 # 1 
-
-helm install install bitnami/mysql 
+kubectl create ns hel2
+helm repo update
+helm -n hel2 install bitnami/nginx --generate-name 
 # 2
-helm list
+helm-n hel2 list 
 # OR 
-helm ls -a
+helm -n hel2 ls -a 
 # 3
-helm delete
+helm -n hel2 uninstall nginx-1654263935
 # 4
-
+helm -n hel2 install nginx-release-latest bitnami/nginx
+helm -n hel2 list
 # 5
-
+helm -n hel2 install nginx-release-11-1-5 bitnami/nginx  --version 11.1.5
 # 6
+helm -n hel2 upgrade nginx-release-11-1-5 bitnami/nginx
+```
+</p></details>
 
+
+### H3 Helm charts parameter use
+In namespace hel3
+1. Check the parameters of chart bitnami/apache, find the parameter for number of replicas
+2. install chart using a number of replicas set to 3 vi Helm values
+
+<details><summary>show</summary><p>
+
+```bash
+kubectl create namespace hel3
+helm repo update
+# 1 
+helm search repo bitnami/apache
+helm show values bitnami/apache |  grep replica -C10
+# Value to be set is replicaCount
+# 2
+helm -n hel3 install my-apache bitnami/apache --set replicaCount=3
+# Verify
+curl <CLUSTER-IP>
+kubectl delete ns hel3
 ```
 </p></details>
 
