@@ -2,15 +2,93 @@
 
 - Discover and use resources that extend Kubernetes (CRD)
 - Understand authentication, authorization and admission control
-- Understanding and defining resource requirements, limits and quotas
-- Understand ConfigMaps
+- [Understanding and defining resource requirements, limits and quotas](#quotas)
+- [Understand ConfigMaps](#cm)
 - Create & consume Secrets
 - Understand ServiceAccounts
 - Understand SecurityContexts
 
 ## TODO Discover and use resources that extend Kubernetes  (CRD)
 ## TODO Understand  authentication,  authorization and  admission  control
-## ConfigMaps
+## <a name="quotas">Understanding and defining resource requirements, limits and quotas</a>
+
+### QU.Quiz
+Explain the concept of **request** and **limit** properties in manifest files
+<details><summary>show</summary>
+<p>
+- request is the scheduled amount of resources to be allocated
+- limit is the upper bound of resource use, that can be allocated beyond the request values.
+</p>
+</details>
+
+
+### QU.Quiz
+Explain the concept of **request** and **limit** properties in manifest files
+<details><summary>show</summary>
+<p>
+- request is the scheduled amount of resources to be allocated
+- limit is the upper bound of resource use, that can be allocated beyond the request values.
+</p>
+</details>
+
+### QU.1 Set Pod Memory and CPU quotas
+In namespace qu1 create a Deployment named apache, image httpd:2.4-alpine, and 3 replicas. The containers should be named apache-pod. Each container should have a memory request of 20Mi and a memory limit of 50Mi and a CPU requet of 20m and a limit of 40m
+
+
+<details><summary>show</summary>
+<p>
+
+```bash
+kubectl create ns qu1
+
+kubectl -n qu1 create deploy apache --image=httpd:2.4-alpine --replicas=3 $do > qu1.yaml
+```
+
+```yaml
+# Edited qu1.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: apache
+  name: apache
+  namespace: qu1
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: apache
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: apache
+    spec:
+      containers:
+      - image: httpd:2.4-alpine
+        name: apache-pod
+        # The below section has been edited
+        resources: 
+          requests:
+            memory: "20Mi"
+            cpu: "20m"
+          limits:
+            memory: "50Mi"
+            cpu: "40m"
+status: {}
+
+```
+
+```bash
+kubectl apply -f qu1.yaml
+```
+
+</p>
+</details>
+
+## <a name="cm">ConfigMaps</a>
 
 kubernetes.io > Documentation > Tasks > Configure Pods and Containers > [Configure a Pod to Use a ConfigMap](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/)
 
