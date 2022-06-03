@@ -1,6 +1,20 @@
-#Application  observability  and maintenance 15%
+## 15% - Application observability and maintenance
+- Understand API deprecations
+- Implement probes and health checks
+- Use provided tools to monitor Kubernetes applications
+- Utilize container logs
+- Debugging in Kubernetes
 
-## Liveness and readiness probes
+
+## Contents
+
+- [Understand API deprecations](#todo)
+- [Implement probes and health checks](#prb)
+- [Ingress](#ingress)
+- [Record](#record)
+
+## <a name="prb">Implement probes and health checks</a>
+
 
 kubernetes.io > Documentation > Tasks > Configure Pods and Containers > [Configure Liveness and Readiness Probes](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/)
 

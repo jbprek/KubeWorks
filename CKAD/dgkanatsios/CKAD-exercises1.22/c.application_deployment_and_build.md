@@ -515,8 +515,7 @@ kubectl rollout history deploy nginx --revision=6 # insert the number of your la
 
 ### D20 Delete the deployment and the horizontal pod autoscaler you created
 
-<details><summary>show</summary>
-<p>
+<details><summary>show</summary><p>
 
 ```bash
 kubectl delete deploy nginx
@@ -525,11 +524,11 @@ kubectl delete hpa nginx
 #Or
 kubectl delete deploy/nginx hpa/nginx
 ```
-</p>
-</details>
+</p></details>
 
 ## <a name="Helo">Helm Management</a>
 
+### H0 List the basic entities of Helm
 
 ### H0 List the basic entities of Helm
 
@@ -539,9 +538,61 @@ kubectl delete deploy/nginx hpa/nginx
 - Chart
 - Repository 
 - Release
-</p>
-</details>
 
+</p></details>
+
+### H1 Repository basic operations
+1. Add repository kubernetes-dashboard with URL https://kubernetes.github.io/dashboard/
+2. List repositories
+3. Update repository
+4. Delete repository kubernetes-dashboard
+5. Search repository for artifact nginx
+6. List everything in bitnami repository
+
+<details><summary>show</summary><p>
+
+```bash
+# 1 
+helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
+# 2
+helm repo list
+# 3
+helm repo update
+# 4
+helm repo remove kubernetes-dashboard
+# 5
+helm search repo nginx
+# 6
+helm search repo bitnami
+```
+</p></details>
+
+### H2 Release Helm basic operations
+1. Deploy chart nginx with generated name
+2. List currently installed charts
+3. Delete previous installed release
+
+
+<details><summary>show</summary><p>
+
+```bash
+# 1 
+
+helm install install bitnami/mysql 
+# 2
+helm list
+# OR 
+helm ls -a
+# 3
+helm delete
+# 4
+
+# 5
+
+# 6
+
+```
+</p></details>
 
 
 ### Question 4 | Helm Management
@@ -556,8 +607,47 @@ There seems to be a broken release, stuck in pending-upgrade state. Find it and 
 
 ## <a name="bluegreen">Canary Blue/Green Deployments</a>
 
+
+### BG.1  Blue green deploy
+A blue deployment was created and running as  follows:
+```bash
+# Existing blue deploy
+kubectl create ns bg
+kubectl -n bg create deploy nginx-v14 --image=nginx:1.14 --replicas=2 --port=80
+kubectl -n bg expose deploy nginx-v14 --name nginx-svc --port=80
+```
+1. Create a green  deploy with nginx version 1.22 named nginx-v22 as the original deploy
+2. Create temporary svc  to test green deploy
+3. Promote green as blue
+4. Delete previous blue deployment and interim green service
+
+
+<details><summary>show</summary><p>
+
+```bash
+# 1 
+kubectl -n bg create deploy nginx-v22 --image=nginx:1.22 --replicas=2 --port=80
+# 2
+kubectl -n bg expose deployment.apps/nginx-v22 --name nginx-green --port=80
+# 3
+kubectl -n bg delete svc  nginx-svc; \
+kubectl -n bg expose deployment.apps/nginx-v22 --name nginx-svc --port=80
+# 4
+kubectl -n bg delete deployment.apps/nginx-v14
+kubectl -n bg delete svc nginx-green
+
+```
+</p></details>
+
 ## C1 Canary Deployment
-In namespace gsv1
+An application is created and running as following
+```bash
+# Existing blue deploy
+kubectl create ns can
+kubectl -n can create deploy nginx-v14 --image=nginx:1.14 --replicas=2 --port=80
+kubectl -n can label deploy nginx-v14 service=webserver
+kubectl -n can expose --name nginx-svc --port=80 --selector="service=webserver"
+```
 - Run a deployment named old-nginx with the following requirements
 1. create a config map to provide an index.html file with the text "welcome to the old version" named cm1
 2. Use image nginx:1.14
@@ -572,6 +662,19 @@ In namespace gsv1
 <details><summary>show</summary>
 <p>
 
+```bash
+# 1 
+kubectl -n bg create deploy nginx-v22 --image=nginx:1.22 --replicas=2 --port=80
+# 2
+kubectl -n bg expose deployment.apps/nginx-v22 --name nginx-green --port=80
+# 3
+kubectl -n bg delete svc  nginx-svc; \
+kubectl -n bg expose deployment.apps/nginx-v22 --name nginx-svc --port=80
+# 4
+kubectl -n bg delete deployment.apps/nginx-v14
+kubectl -n bg delete svc nginx-green
+
+```
 
 </p>
 </details>

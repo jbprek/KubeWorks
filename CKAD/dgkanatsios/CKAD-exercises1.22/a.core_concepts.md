@@ -485,11 +485,11 @@ kubectl exec -it ubuntu -- /bin/bash
 
 ```bash
 #1 
-kubectl run bus3 --image=busybox --command -- sh -c "sleep 3600"
+kubectl run bus3 --image=busybox -- sh -c "sleep 3600"
 # 2 Note missing leading '/'
-kubectl cp bus3:etc/passwd ./passwd.txt
+**0**
 #3 Note missing leading '/'
-kubectl cp passwd.txt bus3:tmp/
+kubectl cp ./passwd.txt bus3:tmp/
 ```
 
 </p>
