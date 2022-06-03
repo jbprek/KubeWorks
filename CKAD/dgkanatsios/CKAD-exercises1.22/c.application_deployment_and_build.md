@@ -670,41 +670,11 @@ kubectl -n bg delete svc nginx-green
 
 ## C1 Canary Deployment
 An application is created and running as following
-```bash
-# Existing blue deploy
-kubectl create ns can
-kubectl -n can create deploy nginx-v14 --image=nginx:1.14 --replicas=2 --port=80
-kubectl -n can label deploy nginx-v14 service=webserver
-kubectl -n can expose --name nginx-svc --port=80 --selector="service=webserver"
-```
-- Run a deployment named old-nginx with the following requirements
-1. create a config map to provide an index.html file with the text "welcome to the old version" named cm1
-2. Use image nginx:1.14
-3. run 3 replicas
-- Create a canary deployment to update the above
-1. create a config map to provide an index.html file with the text "welcome to the new version"
-2. Use image nginx:latest
-- Complete the transition by :
-1. Verifying the correctness of the new deployment
-2. Scale down the old version to 0 replicas
 
 <details><summary>show</summary>
 <p>
-
-```bash
-# 1 
-kubectl -n bg create deploy nginx-v22 --image=nginx:1.22 --replicas=2 --port=80
-# 2
-kubectl -n bg expose deployment.apps/nginx-v22 --name nginx-green --port=80
-# 3
-kubectl -n bg delete svc  nginx-svc; \
-kubectl -n bg expose deployment.apps/nginx-v22 --name nginx-svc --port=80
-# 4
-kubectl -n bg delete deployment.apps/nginx-v14
-kubectl -n bg delete svc nginx-green
-
+See in service exercise "SVC.5 Deployment/Service Expose service based on selector"
 ```
-
 </p>
 </details>
 

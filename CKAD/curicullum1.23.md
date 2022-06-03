@@ -6,14 +6,14 @@
  - Understand multi-container Pod design patterns (e.g. sidecar, init and others)
  - Utilize persistent and ephemeral volumes
 ## 20% - Application Deployment
- - **Use Kubernetes primitives to implement common deployment strategies (e.g. blue/ green or canary)**
+ - Use Kubernetes primitives to implement common deployment strategies (e.g. blue/ green or canary)
  - Understand Deployments and how to perform rolling updates
- - **Use the Helm package**
+ - Use the Helm pack
 ## 15% - Application observability and maintenance
 - **Understand API deprecations**
-- **Implement probes and health checks**
-- **Use provided tools to monitor Kubernetes applications**
-- **Utilize container logs**
+- Implement probes and health checks
+- Use provided tools to monitor Kubernetes applications**
+- Utilize container logs
 - **Debugging in Kubernetes**
 
 ## 25% - Application Environment, Configuration and Security
