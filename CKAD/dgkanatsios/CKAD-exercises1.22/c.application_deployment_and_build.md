@@ -255,7 +255,7 @@ kubectl delete po nginx{1..3}
 
 kubernetes.io > Documentation > Concepts > Workloads > Controllers > [Deployments](https://kubernetes.io/docs/concepts/workloads/controllers/deployment)
 
-### D1 Create a deployment with image nginx:1.18.0, called nginx, having 2 replicas, defining port 80 as the port that this container exposes (don't create a service for this deployment)
+### D1 Common Deploy operations
 In namespace d1
 1. Create a deployment with image nginx:1.18.0, called nginx, having 2 replicas, defining port 80 as the port that this container exposes (don't create a service for this deployment)
 2. View the YAML of this deployment
@@ -274,18 +274,7 @@ In namespace d1
 # -- 0
 kubectl -n d1 create ns d1
 #-- 1
-kubectl -n d1 create deployment nginx  --image=nginx:1.18.0  --dry-run=client -o yaml > deploy.yaml
-vi deploy.yaml
-# change the replicas field from 1 to 2
-# add this section to the container spec and save the deploy.yaml file
-# ports:
-#   - containerPort: 80
-kubectl -n d1 apply -f deploy.yaml
-# OR
-kubectl -n d1 create deployment nginx  --image=nginx:1.18.0  --dry-run=client -o yaml | sed 's/replicas: 1/replicas: 2/g'  | sed 's/image: nginx:1.18.0/image: nginx:1.18.0\n        ports:\n        - containerPort: 80/g' | kubectl -n d1 apply -f -
-# OR
 kubectl -n d1 create deploy nginx --image=nginx:1.18.0 --replicas=2 --port=80
-
 
 #-- 2
 kubectl -n d1 get deploy nginx -o yaml
@@ -298,8 +287,7 @@ kubectl -n d1 rollout status deploy nginx
 
 #-- 4
 kubectl -n d1 describe deploy nginx # you'll see the name of the replica set on the Events section and in the 'NewReplicaSet' property
-
-kubectl -n d1 get rs -l run=nginx # if you created deployment by 'run' command
+# OR
 kubectl -n d1 get rs -l app=nginx # if you created deployment by 'create' command
 
 kubectl -n d1 rollout status deploy nginx
@@ -319,6 +307,8 @@ kubectl -n d1 get rs # check that a new replica set has been created
 kubectl -n d1 get po
 
 #-- 7
+kubectl -n d1 rollout history deployment.apps/nginx --revision 3
+# Indicates the correct image 
 kubectl -n d1 rollout undo deploy nginx
 # wait a bit
 kubectl -n d1 get po # select one 'Running' Pod
@@ -334,7 +324,10 @@ kubectl -n d1 get po # you'll see 'ErrImagePull' or 'ImagePullBackOff'
 
 
 #-- 9
-kubectl -n d1 rollout undo deploy nginx --to-revision=2
+# Check the revision with the desired image
+kubectl rollout history deployment.apps/nginx --revision 3
+kubectl -n d1 rollout undo deploy nginx --to-revision=3
+
 kubectl -n d1 describe deploy nginx | grep Image:
 kubectl -n d1 rollout status deploy nginx # Everything should be OK
 
@@ -342,6 +335,97 @@ kubectl -n d1 rollout status deploy nginx # Everything should be OK
 kubectl -n d1 scale deploy nginx --replicas=5
 kubectl -n d1 get po
 kubectl -n d1 describe deploy nginx
+```
+
+</p>
+</details>
+
+### D2 Rollout strategy
+In namespace d2
+1. Create a deployment named nginx using image nginx 1.18.0  with 8 replicas and ensure that no less that 2 replicas are alive during rollout
+2. Set image of the deployment to 1.19.8 and ensure smooth transition
+<details><summary>show</summary>
+<p>
+
+```bash
+# 0 
+kubectl create ns d2
+
+# 1.1 
+kubectl create deploy nginx --image=nginx:1.18.0 --replicas=8 $do > d2.yaml
+ ```
+-  Edit Yaml file 
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: nginx
+  name: nginx
+spec:
+  replicas: 8
+  selector:
+    matchLabels:
+      app: nginx
+  strategy: # The strategy section has been updated
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 2
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - image: nginx:1.18.0
+        name: nginx
+        resources: {}
+status: {}
+
+```
+```bash
+
+# 1.2  
+kubectl -n d2 apply -f d2.yaml
+
+# 2
+kubectl -n d2 set image deployment.apps/nginx nginx=nginx:1.19.8
+# Watch the pod progress 
+ ```
+
+</p>
+</details>
+
+### D3 Pause - Resume deployments
+In namespace d3
+1. Create a deployment with image nginx:1.18.0, called nginx, having 2 replicas, defining port 80 as the port that this container exposes 
+2. Pause the rollout for the deploy
+3. Update the nginx image to nginx:1.19.8
+4. Verify that nothing happens
+5. Resume the deployment
+6. Verify that image 1.19.8 is in use
+
+<details><summary>show</summary>
+<p>
+
+```bash
+# -- 0
+kubectl create ns d3
+#-- 1
+kubectl -n d3 create deploy nginx --image=nginx:1.18.0 --replicas=2 --port=80
+
+#-- 2
+kubectl -n d3 rollout pause deployment nginx
+#-- 3
+kubectl -n d3 set image deploy nginx nginx=nginx:1.19.8
+#-- 4
+kga -n d3 # no new replica set
+#-- 5
+kubectl -n d3 rollout resume deploy nginx
+#-- 6
+kga -n d3 #  new replica set, deploy indicates expected image version
 ```
 
 </p>
@@ -361,47 +445,7 @@ kubectl get hpa nginx
 </p>
 </details>
 
-### D17 Pause the rollout of the deployment
 
-<details><summary>show</summary>
-<p>
-
-```bash
-kubectl rollout pause deploy nginx
-```
-
-</p>
-</details>
-
-### D18 Update the image to nginx:1.19.9 and check that there's nothing going on, since we paused the rollout
-
-<details><summary>show</summary>
-<p>
-
-```bash
-kubectl set image deploy nginx nginx=nginx:1.19.9
-# or
-kubectl edit deploy nginx
-# change the image to nginx:1.19.9
-kubectl rollout history deploy nginx # no new revision
-```
-
-</p>
-</details>
-
-### D19 Resume the rollout and check that the nginx:1.19.9 image has been applied
-
-<details><summary>show</summary>
-<p>
-
-```bash
-kubectl rollout resume deploy nginx
-kubectl rollout history deploy nginx
-kubectl rollout history deploy nginx --revision=6 # insert the number of your latest revision
-```
-
-</p>
-</details>
 
 ### D20 Delete the deployment and the horizontal pod autoscaler you created
 
