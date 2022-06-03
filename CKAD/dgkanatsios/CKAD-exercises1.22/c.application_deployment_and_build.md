@@ -256,202 +256,92 @@ kubectl delete po nginx{1..3}
 kubernetes.io > Documentation > Concepts > Workloads > Controllers > [Deployments](https://kubernetes.io/docs/concepts/workloads/controllers/deployment)
 
 ### D1 Create a deployment with image nginx:1.18.0, called nginx, having 2 replicas, defining port 80 as the port that this container exposes (don't create a service for this deployment)
-
+In namespace d1
+1. Create a deployment with image nginx:1.18.0, called nginx, having 2 replicas, defining port 80 as the port that this container exposes (don't create a service for this deployment)
+2. View the YAML of this deployment
+3. Check how the deployment rollout is going
+4. View the YAML of the replica set that was created by this deployment
+5. Update the nginx image to nginx:1.19.8
+6. Check the rollout history and confirm that the replicas are OK
+7. Undo the latest rollout and verify that new pods have the old image (nginx:1.18.0)
+8. Do an on purpose update of the deployment with a wrong image nginx:1.91. Verify that something's wrong with the rollout
+9. Find from the history the rollout with version 1.18.0 and restore it.
+10. Scale the deployment to 5 replicas
 <details><summary>show</summary>
 <p>
 
 ```bash
-kubectl create deployment nginx  --image=nginx:1.18.0  --dry-run=client -o yaml > deploy.yaml
+# -- 0
+kubectl -n d1 create ns d1
+#-- 1
+kubectl -n d1 create deployment nginx  --image=nginx:1.18.0  --dry-run=client -o yaml > deploy.yaml
 vi deploy.yaml
 # change the replicas field from 1 to 2
 # add this section to the container spec and save the deploy.yaml file
 # ports:
 #   - containerPort: 80
-kubectl apply -f deploy.yaml
-```
+kubectl -n d1 apply -f deploy.yaml
+# OR
+kubectl -n d1 create deployment nginx  --image=nginx:1.18.0  --dry-run=client -o yaml | sed 's/replicas: 1/replicas: 2/g'  | sed 's/image: nginx:1.18.0/image: nginx:1.18.0\n        ports:\n        - containerPort: 80/g' | kubectl -n d1 apply -f -
+# OR
+kubectl -n d1 create deploy nginx --image=nginx:1.18.0 --replicas=2 --port=80
 
-or, do something like:
 
-```bash
-kubectl create deployment nginx  --image=nginx:1.18.0  --dry-run=client -o yaml | sed 's/replicas: 1/replicas: 2/g'  | sed 's/image: nginx:1.18.0/image: nginx:1.18.0\n        ports:\n        - containerPort: 80/g' | kubectl apply -f -
-```
+#-- 2
+kubectl -n d1 get deploy nginx -o yaml
 
-or,
-```bash
-kubectl create deploy nginx --image=nginx:1.18.0 --replicas=2 --port=80
-```
 
-</p>
-</details>
-
-### D2 View the YAML of this deployment
-
-<details><summary>show</summary>
-<p>
-
-```bash
-kubectl get deploy nginx -o yaml
-```
-
-</p>
-</details>
-
-### D3 View the YAML of the replica set that was created by this deployment
-
-<details><summary>show</summary>
-<p>
-
-```bash
-kubectl describe deploy nginx # you'll see the name of the replica set on the Events section and in the 'NewReplicaSet' property
+#--3
+kubectl -n d1 describe deploy nginx # you'll see the name of the replica set on the Events section and in the 'NewReplicaSet' property
 # OR you can find rs directly by:
-kubectl get rs -l run=nginx # if you created deployment by 'run' command
-kubectl get rs -l app=nginx # if you created deployment by 'create' command
+kubectl -n d1 rollout status deploy nginx
+
+#-- 4
+kubectl -n d1 describe deploy nginx # you'll see the name of the replica set on the Events section and in the 'NewReplicaSet' property
+
+kubectl -n d1 get rs -l run=nginx # if you created deployment by 'run' command
+kubectl -n d1 get rs -l app=nginx # if you created deployment by 'create' command
+
+kubectl -n d1 rollout status deploy nginx
 # you could also just do kubectl get rs
-kubectl get rs nginx-7bf7478b77 -o yaml
-```
+kubectl -n d1 get rs nginx-7bf7478b77 -o yaml
 
-</p>
-</details>
 
-### D4 Get the YAML for one of the pods
-
-<details><summary>show</summary>
-<p>
-
-```bash
-kubectl get po # get all the pods
-# OR you can find pods directly by:
-kubectl get po -l run=nginx # if you created deployment by 'run' command
-kubectl get po -l app=nginx # if you created deployment by 'create' command
-kubectl get po nginx-7bf7478b77-gjzp8 -o yaml
-```
-
-</p>
-</details>
-
-### D5 Check how the deployment rollout is going
-
-<details><summary>show</summary>
-<p>
-
-```bash
-kubectl rollout status deploy nginx
-```
-
-</p>
-</details>
-
-### D6 Update the nginx image to nginx:1.19.8
-
-<details><summary>show</summary>
-<p>
-
-```bash
-kubectl set image deploy nginx nginx=nginx:1.19.8
+#-- 5
+kubectl -n d1 set image deploy nginx nginx=nginx:1.19.8
 # alternatively...
-kubectl edit deploy nginx # change the .spec.template.spec.containers[0].image
-```
+kubectl -n d1 edit deploy nginx # change the .spec.template.spec.containers[0].image
 
-The syntax of the 'kubectl set image' command is `kubectl set image (-f FILENAME | TYPE NAME) CONTAINER_NAME_1=CONTAINER_IMAGE_1 ... CONTAINER_NAME_N=CONTAINER_IMAGE_N [options]`
+#-- 6
+kubectl -n d1 rollout history deploy nginx
+kubectl -n d1 get deploy nginx
+kubectl -n d1 get rs # check that a new replica set has been created
+kubectl -n d1 get po
 
-</p>
-</details>
-
-### D7 Check the rollout history and confirm that the replicas are OK
-
-<details><summary>show</summary>
-<p>
-
-```bash
-kubectl rollout history deploy nginx
-kubectl get deploy nginx
-kubectl get rs # check that a new replica set has been created
-kubectl get po
-```
-
-</p>
-</details>
-
-### D8 Undo the latest rollout and verify that new pods have the old image (nginx:1.18.0)
-
-<details><summary>show</summary>
-<p>
-
-```bash
-kubectl rollout undo deploy nginx
+#-- 7
+kubectl -n d1 rollout undo deploy nginx
 # wait a bit
-kubectl get po # select one 'Running' Pod
-kubectl describe po nginx-5ff4457d65-nslcl | grep -i image # should be nginx:1.18.0
-```
+kubectl -n d1 get po # select one 'Running' Pod
+kubectl -n d1 describe po nginx-5ff4457d65-nslcl | grep -i image # should be nginx:1.18.0
 
-</p>
-</details>
 
-### D10 Do an on purpose update of the deployment with a wrong image nginx:1.91
+#-- 8
+kubectl -n d1 set image deploy nginx nginx=nginx:1.91
 
-<details><summary>show</summary>
-<p>
-
-```bash
-kubectl set image deploy nginx nginx=nginx:1.91
+kubectl -n d1 rollout status deploy nginx
 # or
-kubectl edit deploy nginx
-# change the image to nginx:1.91
-# vim tip: type (without quotes) '/image' and Enter, to navigate quickly
-```
+kubectl -n d1 get po # you'll see 'ErrImagePull' or 'ImagePullBackOff'
 
-</p>
-</details>
 
-### D11 Verify that something's wrong with the rollout
+#-- 9
+kubectl -n d1 rollout undo deploy nginx --to-revision=2
+kubectl -n d1 describe deploy nginx | grep Image:
+kubectl -n d1 rollout status deploy nginx # Everything should be OK
 
-<details><summary>show</summary>
-<p>
-
-```bash
-kubectl rollout status deploy nginx
-# or
-kubectl get po # you'll see 'ErrImagePull' or 'ImagePullBackOff'
-```
-
-</p>
-</details>
-
-### D12 Return the deployment to the second revision (number 2) and verify the image is nginx:1.19.8
-
-<details><summary>show</summary>
-<p>
-
-```bash
-kubectl rollout undo deploy nginx --to-revision=2
-kubectl describe deploy nginx | grep Image:
-kubectl rollout status deploy nginx # Everything should be OK
-```
-
-</p>
-</details>
-
-### D13 Check the details of the fourth revision (number 4)
-
-<details><summary>show</summary>
-<p>
-
-```bash
-kubectl rollout history deploy nginx --revision=4 # You'll also see the wrong image displayed here
-```
-
-</p>
-</details>
-
-### D15 Scale the deployment to 5 replicas
-
-<details><summary>show</summary>
-<p>
-
-```bash
-kubectl scale deploy nginx --replicas=5
-kubectl get po
-kubectl describe deploy nginx
+#-- 10
+kubectl -n d1 scale deploy nginx --replicas=5
+kubectl -n d1 get po
+kubectl -n d1 describe deploy nginx
 ```
 
 </p>
@@ -623,16 +513,6 @@ kubectl delete ns hel3
 ```
 </p></details>
 
-
-### Question 4 | Helm Management
-Task weight: 5%
-
-Team Mercury asked you to perform some operations using Helm, all in Namespace mercury:
-
-Delete release internal-issue-report-apiv1
-Upgrade release internal-issue-report-apiv2 to any newer version of chart bitnami/nginx available
-Install a new release internal-issue-report-apache of chart bitnami/apache. The Deployment should have two replicas, set these via Helm-values during install
-There seems to be a broken release, stuck in pending-upgrade state. Find it and delete it
 
 ## <a name="bluegreen">Canary Blue/Green Deployments</a>
 
