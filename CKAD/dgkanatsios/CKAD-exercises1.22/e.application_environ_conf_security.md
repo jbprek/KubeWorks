@@ -4,8 +4,8 @@
 - Understand authentication, authorization and admission control
 - [Understanding and defining resource requirements, limits and quotas](#quotas)
 - [Understand ConfigMaps](#cm)
-- Create & consume Secrets
-- Understand ServiceAccounts
+- [Create & consume Secrets](#secret)
+- [Understand ServiceAccounts](#sa)
 - [Understand SecurityContexts](#secctx)
 
 ## TODO Discover and use resources that extend Kubernetes  (CRD)
@@ -13,7 +13,6 @@
 
 
 ## <a name="quotas">Understanding and defining resource requirements, limits and quotas</a>
-
 
 ### QU.Quiz
 Explain the concept of **request** and **limit** properties in manifest files
@@ -429,7 +428,7 @@ cat var8 # will show val8
 
 
 
-## Secrets
+## <a name="secret">Create & consume Secrets</a>
 
 kubernetes.io > Documentation > Concepts > Configuration > [Secrets](https://kubernetes.io/docs/concepts/configuration/secret/)
 
@@ -580,7 +579,7 @@ kubectl exec -it nginx -- env | grep USERNAME | cut -d '=' -f 2 # will show 'adm
 </p>
 </details>
 
-## ServiceAccounts
+## <a name="sa">Understand ServiceAccounts</a>
 
 kubernetes.io > Documentation > Tasks > Configure Pods and Containers > [Configure Service Accounts for Pods](https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/)
 
@@ -699,6 +698,14 @@ kubectl describe pod nginx # will see that a new secret called myuser-token-****
 
 </p>
 </details>
+
+### Question 5 | ServiceAccount, Secret
+Task weight: 3%
+Team Neptune has its own ServiceAccount named neptune-sa-v2 in Namespace neptune. A coworker needs the token from the Secret that belongs to that ServiceAccount. Write the base64 decoded token to file /opt/course/5/token.
+
+
+
+Team Neptune has its own ServiceAccount named neptune-sa-v2 in Namespace neptune. A coworker needs the token from the Secret that belongs to that ServiceAccount. Write the base64 decoded token to file /opt/course/5/token.
 
 
 
