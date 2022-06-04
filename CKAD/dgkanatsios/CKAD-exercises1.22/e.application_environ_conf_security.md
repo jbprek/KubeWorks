@@ -704,10 +704,7 @@ kubectl describe pod nginx # will see that a new secret called myuser-token-****
 
 ## <a name="secctx">Understand SecurityContexts</a>
 
-
-
-
-### SCTX.2  Security context, pod level and container level setting
+### SCTX.1  Security context, pod level and container level setting
 
 In namespace sctx
 Create a pod named scbus 
