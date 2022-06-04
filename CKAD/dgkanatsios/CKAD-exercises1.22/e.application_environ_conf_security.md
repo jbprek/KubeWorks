@@ -6,10 +6,12 @@
 - [Understand ConfigMaps](#cm)
 - Create & consume Secrets
 - Understand ServiceAccounts
-- Understand SecurityContexts
+- [Understand SecurityContexts](#secctx)
 
 ## TODO Discover and use resources that extend Kubernetes  (CRD)
 ## TODO Understand  authentication,  authorization and  admission  control
+
+
 ## <a name="quotas">Understanding and defining resource requirements, limits and quotas</a>
 
 ### QU.Quiz
@@ -392,80 +394,6 @@ cat var8 # will show val8
 
 
 
-## SecurityContext
-
-kubernetes.io > Documentation > Tasks > Configure Pods and Containers > [Configure a Security Context for a Pod or Container](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
-
-### Create the YAML for an nginx pod that runs with the user ID 101. No need to create the pod
-
-<details><summary>show</summary>
-<p>
-
-```bash
-kubectl run nginx --image=nginx --restart=Never --dry-run=client -o yaml > pod.yaml
-vi pod.yaml
-```
-
-```YAML
-apiVersion: v1
-kind: Pod
-metadata:
-  creationTimestamp: null
-  labels:
-    run: nginx
-  name: nginx
-spec:
-  securityContext: # insert this line
-    runAsUser: 101 # UID for the user
-  containers:
-  - image: nginx
-    imagePullPolicy: IfNotPresent
-    name: nginx
-    resources: {}
-  dnsPolicy: ClusterFirst
-  restartPolicy: Never
-status: {}
-```
-
-</p>
-</details>
-
-
-### Create the YAML for an nginx pod that has the capabilities "NET_ADMIN", "SYS_TIME" added on its single container
-
-<details><summary>show</summary>
-<p>
-
-```bash
-kubectl run nginx --image=nginx --restart=Never --dry-run=client -o yaml > pod.yaml
-vi pod.yaml
-```
-
-```YAML
-apiVersion: v1
-kind: Pod
-metadata:
-  creationTimestamp: null
-  labels:
-    run: nginx
-  name: nginx
-spec:
-  containers:
-  - image: nginx
-    imagePullPolicy: IfNotPresent
-    name: nginx
-    securityContext: # insert this line
-      capabilities: # and this
-        add: ["NET_ADMIN", "SYS_TIME"] # this as well
-    resources: {}
-  dnsPolicy: ClusterFirst
-  restartPolicy: Never
-status: {}
-```
-
-</p>
-</details>
-
 ## Requests and limits
 
 kubernetes.io > Documentation > Tasks > Configure Pods and Containers > [Assign CPU Resources to Containers and Pods](https://kubernetes.io/docs/tasks/configure-pod-container/assign-cpu-resource/)
@@ -778,3 +706,80 @@ kubectl describe pod nginx # will see that a new secret called myuser-token-****
 
 </p>
 </details>
+
+
+
+## <a name="secctx">Understand SecurityContexts</a>
+
+kubernetes.io > Documentation > Tasks > Configure Pods and Containers > [Configure a Security Context for a Pod or Container](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
+
+### Create the YAML for an nginx pod that runs with the user ID 101. No need to create the pod
+
+<details><summary>show</summary>
+<p>
+
+```bash
+kubectl run nginx --image=nginx --restart=Never --dry-run=client -o yaml > pod.yaml
+vi pod.yaml
+```
+
+```YAML
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: nginx
+  name: nginx
+spec:
+  securityContext: # insert this line
+    runAsUser: 101 # UID for the user
+  containers:
+  - image: nginx
+    imagePullPolicy: IfNotPresent
+    name: nginx
+    resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Never
+status: {}
+```
+
+</p>
+</details>
+
+
+### Create the YAML for an nginx pod that has the capabilities "NET_ADMIN", "SYS_TIME" added on its single container
+
+<details><summary>show</summary>
+<p>
+
+```bash
+kubectl run nginx --image=nginx --restart=Never --dry-run=client -o yaml > pod.yaml
+vi pod.yaml
+```
+
+```YAML
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: nginx
+  name: nginx
+spec:
+  containers:
+  - image: nginx
+    imagePullPolicy: IfNotPresent
+    name: nginx
+    securityContext: # insert this line
+      capabilities: # and this
+        add: ["NET_ADMIN", "SYS_TIME"] # this as well
+    resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Never
+status: {}
+```
+
+</p>
+</details>
+
