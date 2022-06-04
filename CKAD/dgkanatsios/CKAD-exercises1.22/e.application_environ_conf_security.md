@@ -430,37 +430,146 @@ cat var8 # will show val8
 
 ## <a name="secret">Create & consume Secrets</a>
 
-kubernetes.io > Documentation > Concepts > Configuration > [Secrets](https://kubernetes.io/docs/concepts/configuration/secret/)
 
-kubernetes.io > Documentation > Tasks > Inject Data Into Applications > [Distribute Credentials Securely Using Secrets](https://kubernetes.io/docs/tasks/inject-data-application/distribute-credentials-secure/)
-
-### Create a secret called mysecret with the values password=mypass
+### SCRT.1 Secret literal values
+- Create a secret called mysecret with the values username=john, password=mypass
+- Read & decode the encrypted values
 
 <details><summary>show</summary>
 <p>
 
 ```bash
-kubectl create secret generic mysecret --from-literal=password=mypass
+kubectl create secret generic mysecret --from-literal=username=john --from-literal=password=mypass
+# Decrypt
+kubectl get secret mysecret -o=jsonpath='{.data.username}' | base64 -d
+kubectl get secret mysecret -o=jsonpath='{.data.password}' | base64 -d  
 ```
 
 </p>
 </details>
 
-### Create a secret called mysecret2 that gets key/value from a file
-
-Create a file called username with the value admin:
+### SCRT.2 Secret from file
 
 ```bash
-echo -n admin > username
+cat <<EOF > application.properties
+prop1=val1
+prop2=val2
+EOF
 ```
+1. Create a secret **app-secret** from the above file
+2. Display and decode secret values
+3. Create a pod with image busybox and mount the secret under dir /conf-props
 
 <details><summary>show</summary>
 <p>
 
 ```bash
-kubectl create secret generic mysecret2 --from-file=username
+# 1
+kubectl create secret generic app-secret --from-file=application.properties
+# 2.1 get encoded output
+kubectl get secret app-secret -o yaml
+# 2.2 Copy paste the encoded values in the command below:
+echo cHJvcDE9dmFsMQpwcm9wMj12YWwyCg== | base64 -d
+# 3.1 Create pod manifest
+kubectl run app-secret --image=busybox $do -- sh -c 'sleep 3600' > pod.yaml
 ```
+```yaml
+# 3.2 Edit generated pod.yaml into the following
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: app-secret
+  name: app-secret
+spec:
+  containers:
+    - args:
+        - sh
+        - -c
+        - sleep 3600
+      image: busybox
+      name: app-secret
+      resources: {}
+      volumeMounts:
+        - name: foo
+          mountPath: "/conf-props"
+          readOnly: true
+  volumes:
+    - name: foo
+      secret:
+        secretName: app-secret
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+status: {}
+```
+```bash
+# 3.3
+kubectl apply -f pod.yaml
+# 3,4 Verification we can connect to the pod and see plain text /conf-props/application.properties file
+kubectl exec app-secret -it -- sh
+```
+</p>
+</details>
 
+
+### SCRT.3 Secret from environment file
+
+```bash
+cat <<EOF > application.env
+env1=val1
+env2=val2
+EOF
+```
+1. Create a secret **app-secret-env** from the above file
+2. Create a pod with image busybox and set the env vars ENV1 and ENV2 from the respective values above
+
+<details><summary>show</summary>
+<p>
+
+```bash
+# 1
+kubectl create secret generic app-secret-env --from-file=application.env
+
+# 2.1 Create pod manifest
+kubectl run app-secret-env --image=busybox $do -- sh -c 'sleep 3600' > pod.yaml
+```
+```yaml
+# 3.2 Edit generated pod.yaml into the following
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: app-secret
+  name: app-secret
+spec:
+  containers:
+    - args:
+        - sh
+        - -c
+        - sleep 3600
+      image: busybox
+      name: app-secret
+      resources: {}
+      volumeMounts:
+        - name: foo
+          mountPath: "/conf-props"
+          readOnly: true
+  volumes:
+    - name: foo
+      secret:
+        secretName: app-secret
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+status: {}
+```
+```bash
+# 3.3
+kubectl apply -f pod.yaml
+# 3,4 Verification we can connect to the pod and see plain text /conf-props/application.properties file
+kubectl exec app-secret -it -- sh
+```
 </p>
 </details>
 
