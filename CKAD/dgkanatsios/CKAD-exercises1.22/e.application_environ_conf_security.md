@@ -14,15 +14,6 @@
 
 ## <a name="quotas">Understanding and defining resource requirements, limits and quotas</a>
 
-### QU.Quiz
-Explain the concept of **request** and **limit** properties in manifest files
-<details><summary>show</summary>
-<p>
-- request is the scheduled amount of resources to be allocated
-- limit is the upper bound of resource use, that can be allocated beyond the request values.
-</p>
-</details>
-
 
 ### QU.Quiz
 Explain the concept of **request** and **limit** properties in manifest files
@@ -89,6 +80,49 @@ kubectl apply -f qu1.yaml
 
 </p>
 </details>
+
+## Requests and limits
+
+kubernetes.io > Documentation > Tasks > Configure Pods and Containers > [Assign CPU Resources to Containers and Pods](https://kubernetes.io/docs/tasks/configure-pod-container/assign-cpu-resource/)
+
+
+### Get the YAML for a new ResourceQuota called 'myrq' with hard limits of 1 CPU, 1G memory and 2 pods without creating it
+
+<details><summary>show</summary>
+<p>
+
+```bash
+kubectl create quota myrq --hard=cpu=1,memory=1G,pods=2 --dry-run=client -o yaml
+```
+
+</p>
+</details>
+
+
+### Create an nginx pod with requests cpu=100m,memory=256Mi and limits cpu=200m,memory=512Mi
+
+<details><summary>show</summary>
+<p>
+
+```bash
+kubectl run nginx --image=nginx --restart=Never --requests='cpu=100m,memory=256Mi' --limits='cpu=200m,memory=512Mi'
+```
+
+Note: Use of `--requests` and `--limits` flags in the imperative `run` command is deprecated as of 1.21 K8s version and will be removed in the future. Instead, use `kubectl set resources` command in combination with `kubectl run --dry-run=client -o yaml ...` as shown below.
+
+Alternative using `set resources` in combination with imperative `run` command:
+
+```bash
+kubectl run nginx --image=nginx --restart=Never --dry-run=client -o yaml | kubectl set resources -f - --requests=cpu=100m,memory=256Mi --limits=cpu=200m,memory=512Mi --local -o yaml > nginx-pod.yml
+```
+
+```bash
+kubectl create -f nginx-pod.yml
+```
+
+</p>
+</details>
+
 
 ## <a name="cm">ConfigMaps</a>
 
@@ -394,47 +428,6 @@ cat var8 # will show val8
 
 
 
-## Requests and limits
-
-kubernetes.io > Documentation > Tasks > Configure Pods and Containers > [Assign CPU Resources to Containers and Pods](https://kubernetes.io/docs/tasks/configure-pod-container/assign-cpu-resource/)
-
-
-### Get the YAML for a new ResourceQuota called 'myrq' with hard limits of 1 CPU, 1G memory and 2 pods without creating it
-
-<details><summary>show</summary>
-<p>
-
-```bash
-kubectl create quota myrq --hard=cpu=1,memory=1G,pods=2 --dry-run=client -o yaml
-```
-
-</p>
-</details>
-
-
-### Create an nginx pod with requests cpu=100m,memory=256Mi and limits cpu=200m,memory=512Mi
-
-<details><summary>show</summary>
-<p>
-
-```bash
-kubectl run nginx --image=nginx --restart=Never --requests='cpu=100m,memory=256Mi' --limits='cpu=200m,memory=512Mi'
-```
-
-Note: Use of `--requests` and `--limits` flags in the imperative `run` command is deprecated as of 1.21 K8s version and will be removed in the future. Instead, use `kubectl set resources` command in combination with `kubectl run --dry-run=client -o yaml ...` as shown below.
-
-Alternative using `set resources` in combination with imperative `run` command:
-
-```bash
-kubectl run nginx --image=nginx --restart=Never --dry-run=client -o yaml | kubectl set resources -f - --requests=cpu=100m,memory=256Mi --limits=cpu=200m,memory=512Mi --local -o yaml > nginx-pod.yml
-```
-
-```bash
-kubectl create -f nginx-pod.yml
-```
-
-</p>
-</details>
 
 ## Secrets
 
@@ -711,15 +704,23 @@ kubectl describe pod nginx # will see that a new secret called myuser-token-****
 
 ## <a name="secctx">Understand SecurityContexts</a>
 
-kubernetes.io > Documentation > Tasks > Configure Pods and Containers > [Configure a Security Context for a Pod or Container](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
 
-### Create the YAML for an nginx pod that runs with the user ID 101. No need to create the pod
+
+
+### SEC-CTX.1  Security context, pod level and container level setting
+
+In namespace sctx
+Create a pod named scbus 
+- image busybox
+- with an emptyDir volume mounted at /demo
+- with pod running as user 1000 group 2000 filesystem 2000
+- container with no privilege escalation
 
 <details><summary>show</summary>
 <p>
 
 ```bash
-kubectl run nginx --image=nginx --restart=Never --dry-run=client -o yaml > pod.yaml
+kubectl -n sctx run scbus --image=busybox --restart=Never --dry-run=client -o yaml -- /bin/sh -c "sleep 1d" > pod.yaml
 vi pod.yaml
 ```
 
@@ -729,32 +730,54 @@ kind: Pod
 metadata:
   creationTimestamp: null
   labels:
-    run: nginx
-  name: nginx
+    run: scbus
+  name: scbus
+  namespace: sctx
 spec:
-  securityContext: # insert this line
-    runAsUser: 101 # UID for the user
+  volumes:
+    - name: shared-data
+      emptyDir: {}
+
+  securityContext:
+    runAsUser: 1000
+    runAsGroup: 3000
+    fsGroup: 2000
   containers:
-  - image: nginx
-    imagePullPolicy: IfNotPresent
-    name: nginx
-    resources: {}
+    - args:
+        - /bin/sh
+        - -c
+        - sleep 1d
+      image: busybox
+      volumeMounts:
+        - name: shared-data
+          mountPath: /demo
+      name: scbus
+      securityContext:
+        allowPrivilegeEscalation: false
+      resources: {}
   dnsPolicy: ClusterFirst
-  restartPolicy: Never
+  restartPolicy: Always
 status: {}
+
 ```
 
 </p>
 </details>
 
 
-### Create the YAML for an nginx pod that has the capabilities "NET_ADMIN", "SYS_TIME" added on its single container
+
+### SEC-CTX.1  Security context, pod level and container level setting
+
+In namespace sctx
+Create the YAML for an nginx pod that has the capabilities "NET_ADMIN", "SYS_TIME" added on its single container
+
 
 <details><summary>show</summary>
 <p>
 
 ```bash
-kubectl run nginx --image=nginx --restart=Never --dry-run=client -o yaml > pod.yaml
+kubectl -n sctx run nginx --image=nginx --restart=Never --dry-run=client -o yaml > pod.yaml
+
 vi pod.yaml
 ```
 
@@ -764,22 +787,36 @@ kind: Pod
 metadata:
   creationTimestamp: null
   labels:
-    run: nginx
-  name: nginx
+    run: scbus
+  name: scbus
+  namespace: sctx
 spec:
+  volumes:
+    - name: shared-data
+      emptyDir: {}
+
+  securityContext:
+    runAsUser: 1000
+    runAsGroup: 3000
+    fsGroup: 2000
   containers:
-  - image: nginx
-    imagePullPolicy: IfNotPresent
-    name: nginx
-    securityContext: # insert this line
-      capabilities: # and this
-        add: ["NET_ADMIN", "SYS_TIME"] # this as well
-    resources: {}
+    - args:
+        - /bin/sh
+        - -c
+        - sleep 1d
+      image: busybox
+      volumeMounts:
+        - name: shared-data
+          mountPath: /demo
+      name: scbus
+      securityContext:
+        allowPrivilegeEscalation: false
+      resources: {}
   dnsPolicy: ClusterFirst
-  restartPolicy: Never
+  restartPolicy: Always
 status: {}
+
 ```
 
 </p>
 </details>
-
