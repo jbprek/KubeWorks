@@ -707,7 +707,7 @@ kubectl describe pod nginx # will see that a new secret called myuser-token-****
 
 
 
-### SEC-CTX.1  Security context, pod level and container level setting
+### SCTX.2  Security context, pod level and container level setting
 
 In namespace sctx
 Create a pod named scbus 
@@ -766,7 +766,7 @@ status: {}
 
 
 
-### SEC-CTX.1  Security context, pod level and container level setting
+### SCTX.2  Security context, container capabilities
 
 In namespace sctx
 Create the YAML for an nginx pod that has the capabilities "NET_ADMIN", "SYS_TIME" added on its single container
