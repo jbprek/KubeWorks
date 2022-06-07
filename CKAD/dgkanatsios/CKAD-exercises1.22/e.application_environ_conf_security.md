@@ -529,20 +529,20 @@ EOF
 
 ```bash
 # 1
-kubectl create secret generic app-secret-env --from-file=application.env
+kubectl create secret generic app-secret-env --from-env-file=application.env
 
 # 2.1 Create pod manifest
 kubectl run app-secret-env --image=busybox $do -- sh -c 'sleep 3600' > pod.yaml
 ```
 ```yaml
-# 3.2 Edit generated pod.yaml into the following
+# 2.2 Edit generated pod.yaml into the following
 apiVersion: v1
 kind: Pod
 metadata:
   creationTimestamp: null
   labels:
-    run: app-secret
-  name: app-secret
+    run: app-secret-env
+  name: app-secret-env
 spec:
   containers:
     - args:
@@ -550,149 +550,36 @@ spec:
         - -c
         - sleep 3600
       image: busybox
-      name: app-secret
+      env:
+        - name: ENV1
+          valueFrom:
+            secretKeyRef:
+              name: app-secret-env
+              key: env1
+        - name: ENV2
+          valueFrom:
+            secretKeyRef:
+              name: app-secret-env
+              key: env2
+      name: app-secret-env
       resources: {}
-      volumeMounts:
-        - name: foo
-          mountPath: "/conf-props"
-          readOnly: true
-  volumes:
-    - name: foo
-      secret:
-        secretName: app-secret
   dnsPolicy: ClusterFirst
   restartPolicy: Always
 status: {}
+
 ```
 ```bash
-# 3.3
+# 2.3
 kubectl apply -f pod.yaml
 # 3,4 Verification we can connect to the pod and see plain text /conf-props/application.properties file
-kubectl exec app-secret -it -- sh
+kubectl exec app-secret-env -i -- env | grep ENV
 ```
-</p>
-</details>
-
-### Get the value of mysecret2
-
-<details><summary>show</summary>
-<p>
-
-```bash
-kubectl get secret mysecret2 -o yaml
-echo -n YWRtaW4= | base64 -d # on MAC it is -D, which decodes the value and shows 'admin'
-```
-
-Alternative using `--jsonpath`:
-
-```bash
-kubectl get secret mysecret2 -o jsonpath='{.data.username}' | base64 -d  # on MAC it is -D
-```
-
-Alternative using `--template`:
-
-```bash
-kubectl get secret mysecret2 --template '{{.data.username}}' | base64 -d  # on MAC it is -D
-```
-
-</p>
-</details>
-
-### Create an nginx pod that mounts the secret mysecret2 in a volume on path /etc/foo
-
-<details><summary>show</summary>
-<p>
-
-```bash
-kubectl run nginx --image=nginx --restart=Never -o yaml --dry-run=client > pod.yaml
-vi pod.yaml
-```
-
-```YAML
-apiVersion: v1
-kind: Pod
-metadata:
-  creationTimestamp: null
-  labels:
-    run: nginx
-  name: nginx
-spec:
-  volumes: # specify the volumes
-  - name: foo # this name will be used for reference inside the container
-    secret: # we want a secret
-      secretName: mysecret2 # name of the secret - this must already exist on pod creation
-  containers:
-  - image: nginx
-    imagePullPolicy: IfNotPresent
-    name: nginx
-    resources: {}
-    volumeMounts: # our volume mounts
-    - name: foo # name on pod.spec.volumes
-      mountPath: /etc/foo #our mount path
-  dnsPolicy: ClusterFirst
-  restartPolicy: Never
-status: {}
-```
-
-```bash
-kubectl create -f pod.yaml
-kubectl exec -it nginx /bin/bash
-ls /etc/foo  # shows username
-cat /etc/foo/username # shows admin
-```
-
-</p>
-</details>
-
-### Delete the pod you just created and mount the variable 'username' from secret mysecret2 onto a new nginx pod in env variable called 'USERNAME'
-
-<details><summary>show</summary>
-<p>
-
-```bash
-kubectl delete po nginx
-kubectl run nginx --image=nginx --restart=Never -o yaml --dry-run=client > pod.yaml
-vi pod.yaml
-```
-
-```YAML
-apiVersion: v1
-kind: Pod
-metadata:
-  creationTimestamp: null
-  labels:
-    run: nginx
-  name: nginx
-spec:
-  containers:
-  - image: nginx
-    imagePullPolicy: IfNotPresent
-    name: nginx
-    resources: {}
-    env: # our env variables
-    - name: USERNAME # asked name
-      valueFrom:
-        secretKeyRef: # secret reference
-          name: mysecret2 # our secret's name
-          key: username # the key of the data in the secret
-  dnsPolicy: ClusterFirst
-  restartPolicy: Never
-status: {}
-```
-
-```bash
-kubectl create -f pod.yaml
-kubectl exec -it nginx -- env | grep USERNAME | cut -d '=' -f 2 # will show 'admin'
-```
-
 </p>
 </details>
 
 ## <a name="sa">Understand ServiceAccounts</a>
 
-kubernetes.io > Documentation > Tasks > Configure Pods and Containers > [Configure Service Accounts for Pods](https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/)
-
-### See all the service accounts of the cluster in all namespaces
+### SA.1 See all the service accounts of the cluster in all namespaces
 
 <details><summary>show</summary>
 <p>
@@ -709,112 +596,67 @@ kubectl get sa -A
 </p>
 </details>
 
-### Create a new serviceaccount called 'myuser'
+### SA.1  ServiceAccount creation
+
+1. Create a new serviceaccount called 'myuser'
+2. Get the token of the service account
+3. Run a busybox pod using the specific service account
 
 <details><summary>show</summary>
 <p>
 
 ```bash
+# 1 
 kubectl create sa myuser
+# 2.1 we can get the token from the secret accosiated with the service account at .secrets.name
+kubectl get sa myuser -o=jsonpath='{.secrets[0].name}{"\n"}'
+# 2.2 Get the encoded info from the secret revealed above and decode it through base64 cmd.
+kubectl get secrets myuser-token-scm6s -o=jsonpath='{.data.token}' | base64 -d
+# 3.1 Create a manifest file
+kubectl run app-secret-env --image=busybox $do -- sh -c 'sleep 3600' > pod.yaml
 ```
-
-Alternatively:
-
-```bash
-# let's get a template easily
-kubectl get sa default -o yaml > sa.yaml
-vim sa.yaml
-```
-
-```YAML
+```yaml
+# 2.2 Edit generated pod.yaml into the following
 apiVersion: v1
-kind: ServiceAccount
+kind: Pod
 metadata:
-  name: myuser
+  creationTimestamp: null
+  labels:
+    run: app-secret-env
+  name: app-secret-env
+spec:
+  containers:
+    - args:
+        - sh
+        - -c
+        - sleep 3600
+      image: busybox
+      env:
+        - name: ENV1
+          valueFrom:
+            secretKeyRef:
+              name: app-secret-env
+              key: env1
+        - name: ENV2
+          valueFrom:
+            secretKeyRef:
+              name: app-secret-env
+              key: env2
+      name: app-secret-env
+      resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+status: {}
+
 ```
-
 ```bash
-kubectl create -f sa.yaml
-```
-
-</p>
-</details>
-
-### Create an nginx pod that uses 'myuser' as a service account
-
-<details><summary>show</summary>
-<p>
-
-```bash
-kubectl run nginx --image=nginx --restart=Never --serviceaccount=myuser -o yaml --dry-run=client > pod.yaml
+# 2.3
 kubectl apply -f pod.yaml
+# 3,4 Verification we can connect to the pod and see plain text /conf-props/application.properties file
+kubectl exec app-secret-env -i -- env | grep ENV
 ```
-
-or you can add manually:
-
-```bash
-kubectl run nginx --image=nginx --restart=Never -o yaml --dry-run=client > pod.yaml
-vi pod.yaml
-```
-
-```YAML
-apiVersion: v1
-kind: Pod
-metadata:
-  creationTimestamp: null
-  labels:
-    run: nginx
-  name: nginx
-spec:
-  serviceAccountName: myuser # we use pod.spec.serviceAccountName
-  containers:
-  - image: nginx
-    imagePullPolicy: IfNotPresent
-    name: nginx
-    resources: {}
-  dnsPolicy: ClusterFirst
-  restartPolicy: Never
-status: {}
-```
-
-or
-
-```YAML
-apiVersion: v1
-kind: Pod
-metadata:
-  creationTimestamp: null
-  labels:
-    run: nginx
-  name: nginx
-spec:
-  serviceAccount: myuser # we use pod.spec.serviceAccount
-  containers:
-  - image: nginx
-    imagePullPolicy: IfNotPresent
-    name: nginx
-    resources: {}
-  dnsPolicy: ClusterFirst
-  restartPolicy: Never
-status: {}
-```
-
-```bash
-kubectl create -f pod.yaml
-kubectl describe pod nginx # will see that a new secret called myuser-token-***** has been mounted
-```
-
-
 </p>
 </details>
-
-### Question 5 | ServiceAccount, Secret
-Task weight: 3%
-Team Neptune has its own ServiceAccount named neptune-sa-v2 in Namespace neptune. A coworker needs the token from the Secret that belongs to that ServiceAccount. Write the base64 decoded token to file /opt/course/5/token.
-
-
-
-Team Neptune has its own ServiceAccount named neptune-sa-v2 in Namespace neptune. A coworker needs the token from the Secret that belongs to that ServiceAccount. Write the base64 decoded token to file /opt/course/5/token.
 
 
 

@@ -6,6 +6,7 @@ set sw=2
 set expandtab
 
 source <(kubectl completion bash)
+source <(helm completion bash)
 alias ksn='kubectl config set-context --current --namespace '
 alias kgn='kubectl config view | grep namespace'
 alias kgp='kubectl get po -o wide --show-labels'
