@@ -342,7 +342,7 @@ kubectl -n d1 describe deploy nginx
 
 ### D2 Rollout strategy
 In namespace d2
-1. Create a deployment named nginx using image nginx 1.18.0  with 8 replicas and ensure that no less that 2 replicas are alive during rollout
+1. Create a deployment named nginx using image nginx 1.18.0  with 5 replicas. Use proportional scaling and ensure that no less that 3 replicas are alive during rollout and that up to 10 replicas can exist during deployment rollout transitions. Also ensure that history is maintained for no more than 10 rollouts.
 2. Set image of the deployment to 1.19.8 and ensure smooth transition
 <details><summary>show</summary>
 <p>
@@ -352,37 +352,38 @@ In namespace d2
 kubectl create ns d2
 
 # 1.1 
-kubectl create deploy nginx --image=nginx:1.18.0 --replicas=8 $do > d2.yaml
+kubectl -n d2  create deploy nginx --image=nginx:1.18.0 --replicas=8 $do > d2.yaml
  ```
 -  Edit Yaml file 
 ```yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  creationTimestamp: null
   labels:
     app: nginx
   name: nginx
+  namespace: d2
 spec:
-  replicas: 8
+  replicas: 5
+  revisionHistoryLimit: 10  # Added
   selector:
     matchLabels:
       app: nginx
-  strategy: # The strategy section has been updated
-    type: RollingUpdate
-    rollingUpdate:
-      maxUnavailable: 2
+  strategy:
+    rollingUpdate:      # Added
+      maxUnavailable: 2 #  Added 5 -3 
+      maxSurge: 10      # Added
   template:
     metadata:
-      creationTimestamp: null
       labels:
         app: nginx
     spec:
       containers:
-      - image: nginx:1.18.0
-        name: nginx
-        resources: {}
+        - image: nginx
+          name: nginx
+          resources: {}
 status: {}
+
 
 ```
 ```bash
@@ -393,6 +394,7 @@ kubectl -n d2 apply -f d2.yaml
 # 2
 kubectl -n d2 set image deployment.apps/nginx nginx=nginx:1.19.8
 # Watch the pod progress 
+kubectl -n d2 get all
  ```
 
 </p>
@@ -417,6 +419,141 @@ kubectl create ns d3
 kubectl -n d3 create deploy nginx --image=nginx:1.18.0 --replicas=2 --port=80
 
 #-- 2
+kubectl -n d3 rollout pause deployment nginx
+#-- 3
+kubectl -n d3 set image deploy nginx nginx=nginx:1.19.8
+#-- 4
+kga -n d3 # no new replica set
+#-- 5
+kubectl -n d3 rollout resume deploy nginx
+#-- 6
+kga -n d3 #  new replica set, deploy indicates expected image version
+```
+
+</p>
+</details>
+
+
+
+### D4 Pod to deployment
+In namespace d4
+
+Given that a pod name webserver exists create a deployment named webserver-deploy using the pod as template. Use a selector pod: webserver-pod
+
+Pod has to be created with command
+```bash
+kubectl run -n d4 webserver --image=nginx
+```
+
+
+
+1. Create a deployment with image nginx:1.18.0, called nginx, having 2 replicas, defining port 80 as the port that this container exposes
+2. Pause the rollout for the deploy
+3. Update the nginx image to nginx:1.19.8
+4. Verify that nothing happens
+5. Resume the deployment
+6. Verify that image 1.19.8 is in use
+
+<details><summary>show</summary>
+<p>
+
+```bash
+# -- 0
+kubectl create ns d4
+#-- 1 Get the yaml of the pod 
+kubectl -n d4 get pod webserver -o yaml > d4-pod.yaml
+```
+```yaml
+# d4-pod.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: webserver-deploy
+  name: webserver-deploy
+  namespace: d4
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: webserver-deploy
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: webserver-deploy
+    spec:
+      containers:
+        - image: nginx
+          name: nginx
+          resources: {}
+status: {}
+```
+```bash
+#-- 2 Create the skeleton  of the deployment
+kubectl -n d4 create deploy webserver-deploy --image=nginx $do > d4.yaml
+```
+```yaml
+#d4.yaml Original
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: webserver-deploy
+  name: webserver-deploy
+  namespace: d4
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: webserver-deploy
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: webserver-deploy
+    spec:
+      containers:
+        - image: nginx
+          name: nginx
+          resources: {}
+status: {}
+```
+```yaml
+#d4.yaml Edited
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: webserver-deploy
+    pod: webserver
+  name: webserver-deploy
+  namespace: d4
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      pod: webserver-pod
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: webserver-deploy
+        pod: webserver-pod
+    spec:
+      containers:
+        - image: nginx
+          name: nginx
+          resources: {}
+status: {}
+```
+
 kubectl -n d3 rollout pause deployment nginx
 #-- 3
 kubectl -n d3 set image deploy nginx nginx=nginx:1.19.8
