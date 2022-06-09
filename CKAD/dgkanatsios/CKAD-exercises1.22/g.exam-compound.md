@@ -7,11 +7,17 @@
 rm -f /opt/ckad/moon/*
 
 kubectl delete ns moon
+
+# E2
+rm -f /opt/ckad/neptune/*
+kubectl delete ns moon
 ```
 
 ## Setup:
 ```bash
 # E1
+mkdir -p /opt/ckad/moon/
+
 kubectl create ns moon
 
 cat << EOF > /opt/ckad/moon/webserver-pod.yaml
@@ -36,9 +42,10 @@ EOF
 kubectl apply -f /opt/ckad/moon/webserver-pod.yaml
 
 # E2
+mkdir -p /opt/ckad/neptune/
 kubectl create ns neptune
 
-cat << EOF > /opt/ckad/neptune/website-deploy-v14.yaml
+cat << EOF > /opt/ckad/neptune/nginx-114.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -47,9 +54,8 @@ metadata:
     app: nginx-114
     service: webserver
   name: nginx-114
-  namespace: s3
 spec:
-  replicas: 2
+  replicas: 3
   selector:
     matchLabels:
       app: nginx-114
@@ -68,8 +74,11 @@ spec:
         - containerPort: 80
         resources: {}
 status: {}
-```
+EOF
 
+kubectl -n neptune apply -f /opt/ckad/neptune/nginx-114.yaml
+kubectl -n neptune expose deploy nginx-114 --port=80
+```
 
 
 # E1 Pod to deployment, Security Context 6 minutes
@@ -86,16 +95,12 @@ In namespace moon there's a pod called webserver
 
 
 # E2 Canary deployment
-In namespace s5
-This the backbone of Canary deployments
-
-1. Create a deployment nginx-114 with nginx version 1.14 label deployment and pods labeled with 'service=webserver' and 2 replicas
-2. Create a service exposing the above deploy named nginx-svc
-3. Create a deployment nginx-119 with nginx version 1.19 label deployment and pods labeled with 'service=webserver' and 1 replica
-4. Observe service and endpoints that are picking up
-
-9. Delete namespace to cleanup
-
+In namespace neptune there is a service running exposing deployment nginx-114, called nginx-svc
+1. Create a canary deployment updating the image to nginx:1.18
+2. Test then canary deployment 
+3. Once you're confident that the canary instance is running properly
+    1. Scale Up the canary deployment to 3 instances
+    2. Scale down the original deployment to 0
 
 <details><summary>show</summary>
 <p>
