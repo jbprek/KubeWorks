@@ -553,7 +553,7 @@ spec:
           resources: {}
 status: {}
 ```
-
+```bash
 kubectl -n d3 rollout pause deployment nginx
 #-- 3
 kubectl -n d3 set image deploy nginx nginx=nginx:1.19.8
