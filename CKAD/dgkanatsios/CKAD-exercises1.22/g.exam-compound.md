@@ -2,6 +2,9 @@
 
 
 ## clean-up:
+<details><summary>show</summary>
+<p>
+
 ```bash
 # E1
 rm -f /opt/ckad/moon/*
@@ -16,6 +19,12 @@ kubectl delete ns moon
 rm -f /opt/ckad/minerva/*
 kubectl delete ns minerva
 ```
+</p>
+</details>
+
+
+<details><summary>show</summary>
+<p>
 
 ## Setup:
 ```bash
@@ -87,11 +96,11 @@ kubectl -n neptune expose deploy nginx-114 --port=80
 mkdir -p /opt/ckad/minerva/
 kubectl create ns minerva
 
-cat << EOF > /opt/ckad/minerva/web-content.html
+cat << EOF > /opt/ckad/minerva/home-page1.html
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Welcome to deploy</title>
+    <title>Welcome to deploy version 1</title>
     <style>
         html { color-scheme: light dark; }
         body { width: 35em; margin: 0 auto;
@@ -99,12 +108,34 @@ cat << EOF > /opt/ckad/minerva/web-content.html
     </style>
 </head>
 <body>
-<h1>Welcome to deploy</h1>
+<h1>Welcome to deploy version 1</h1>
+<p><em>Thank you for using nginx.</em></p>
+</body>
+</html>
+EOF
+
+cat << EOF > /opt/ckad/minerva/home-page2.html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Welcome to deploy version 1</title>
+    <style>
+        html { color-scheme: light dark; }
+        body { width: 35em; margin: 0 auto;
+            font-family: Tahoma, Verdana, Arial, sans-serif; }
+    </style>
+</head>
+<body>
+<h1>Welcome to deploy version 1</h1>
 <p><em>Thank you for using nginx.</em></p>
 </body>
 </html>
 EOF
 ```
+
+
+</p>
+</details>
 
 
 # E1 Pod to deployment, Security Context 6 minutes
