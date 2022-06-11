@@ -1,7 +1,7 @@
 # Exam Compound
 
 
-## clean-up:
+## Clean-up:
 <details><summary>show</summary>
 <p>
 
@@ -22,11 +22,11 @@ kubectl delete ns minerva
 </p>
 </details>
 
-
+## Setup:
 <details><summary>show</summary>
 <p>
 
-## Setup:
+
 ```bash
 # E1
 mkdir -p /opt/ckad/moon/
@@ -90,7 +90,7 @@ status: {}
 EOF
 
 kubectl -n neptune apply -f /opt/ckad/neptune/nginx-114.yaml
-kubectl -n neptune expose deploy nginx-114 --port=80 --selector=service:webserver
+kubectl -n neptune expose deploy nginx-114 --port=80 --name=webserver --selector=service=webserver
 
 # E3
 mkdir -p /opt/ckad/minerva/
