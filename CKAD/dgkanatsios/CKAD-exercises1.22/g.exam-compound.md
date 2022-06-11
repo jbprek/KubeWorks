@@ -64,8 +64,8 @@ kind: Deployment
 metadata:
   creationTimestamp: null
   labels:
-    app: nginx-114
-    service: webserver
+    release: nginx-114
+    service: nginx-svc
   name: nginx-114
 spec:
   replicas: 3
@@ -77,8 +77,8 @@ spec:
     metadata:
       creationTimestamp: null
       labels:
-        service: webserver
-        app: nginx-114
+        service: nginx-svc
+        release: nginx-114
     spec:
       containers:
       - image: nginx:1.14
@@ -90,7 +90,7 @@ status: {}
 EOF
 
 kubectl -n neptune apply -f /opt/ckad/neptune/nginx-114.yaml
-kubectl -n neptune expose deploy nginx-114 --port=80 --name=webserver --selector=service=webserver
+kubectl -n neptune expose deploy nginx-114 --port=80 --name=nginx-svc --selector=service=webserver
 
 # E3
 mkdir -p /opt/ckad/minerva/
