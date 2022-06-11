@@ -13,7 +13,7 @@ kubectl delete ns moon
 
 # E2
 rm -f /opt/ckad/neptune/*
-kubectl delete ns moon
+kubectl delete ns neptune
 
 # E3
 rm -f /opt/ckad/minerva/*
@@ -168,7 +168,7 @@ In namespace neptune there is a service running exposing deployment nginx-114, c
 
 
 # E3 Config map 5 minutes
-Create a config map in namespace minerva from file /opt/ckad/minerva/web-content.html
+Create a config map in namespace minerva from file /opt/ckad/minerva/home-page1.html
 Create a pod name cmweb in namespace minerva mounting this file as /usr/share/nginx/html/index.html using as image nginx:latest
 Verify that the file is served as the root page of the pod.
 
