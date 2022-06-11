@@ -90,7 +90,7 @@ status: {}
 EOF
 
 kubectl -n neptune apply -f /opt/ckad/neptune/nginx-114.yaml
-kubectl -n neptune expose deploy nginx-114 --port=80 --name=nginx-svc --selector=service=webserver
+kubectl -n neptune expose deploy nginx-114 --port=80 --name=nginx-svc --selector=service=nginx-svc
 
 # E3
 mkdir -p /opt/ckad/minerva/
