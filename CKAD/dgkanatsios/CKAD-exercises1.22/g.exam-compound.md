@@ -71,7 +71,7 @@ spec:
   replicas: 3
   selector:
     matchLabels:
-      app: nginx-114
+      release: nginx-114
   strategy: {}
   template:
     metadata:
