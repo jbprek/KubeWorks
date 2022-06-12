@@ -20,8 +20,11 @@ It's time for the sample exam. I have created a couple of nice assignments for y
 
 10. Next is about using storage. All the objects in this assignment should be created in the ckad-1311 namespace. Create a Persistent Volume with the name 1311-pv. It should provide two gigabytes of storage and read-write access to multiple clients simultaneously. Use any storage type you like. 
 11. Next, create a Persistent Volume Claim that requests one gigabyte from any persistent volume that allows multiple clients simultaneous read-write access. And the name of that object should be 1311-pvc. And finally, create a Pod with the name 1311-pod that uses this Persistent Volume. It should run an Nginx image and amount of volume on the directory/webdata. 
-12. Then we are going to use Helm. Use the Helm package manager to learn the bitnami Nginx application according to the following requirements. The application should start three Pods and the name of the application is set to helmginx. Following is a quota. Run a Deployment with the name restrictginx, with three Pods where every Pod initially requests 64 megabytes of Ram with an upper limit of 256 megabytes of Ram. 
-13. And finally, using a ServiceAccount. Create a Pod with the name allaccess. And also create a ServiceAccount with the name allaccess and ensure that the Pod is using the ServiceAccount where you don't have to set up any additional role based access control. That's all. Remember you have two hours, good luck. And don't forget to watch the solutions once you are done.
+12. Then we are going to use Helm. Use the Helm package manager to learn the bitnami Nginx application according to the following requirements. The application should start three Pods and the name of the application is set to helmginx. 
+13. Following is a quota. Run a Deployment with the name restrictginx, with three Pods where every Pod initially requests 64 megabytes of Ram with an upper limit of 256 megabytes of Ram. 
+14. And finally, using a ServiceAccount. Create a Pod with the name allaccess. And also create a ServiceAccount with the name allaccess and ensure that the Pod is using the ServiceAccount where you don't have to set up any additional role based access control. 
+15. 
+16. That's all. Remember you have two hours, good luck. And don't forget to watch the solutions once you are done.
 
 table of contents
 Settings

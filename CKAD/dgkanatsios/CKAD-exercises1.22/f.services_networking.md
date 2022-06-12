@@ -378,7 +378,7 @@ kubectl -n ing create deployment nginx --image=nginx --port=80  --replicas 3
 kubectl -n ing expose deployment nginx --port=8080 --target-port=80
 kubectl create ns ing2
 kubectl -n ing2 create deployment apache --image=httpd --port=80 --replicas 3
-kubectl -n ing2 expose deployment apache --port=8080 -target-port=80
+kubectl -n ing2 expose deployment apache --port=8080 --target-port=80
 ```
 
 ### Cleanup
