@@ -10,12 +10,12 @@
 - [Services](#svc)
 - [Nework Policy](#netpol)
 - [Ingress](#ingress)
-- [Record](#record)
 
 ## <a name="svc">Services</a>
 ### Setup
 
 ### SVC.1 ClusterIP DNS
+
 In Namespace s1
 
 1. Create a service on top of a deployment named nginx with image nginx with 3 replicas and expose its port 80. Service should be named nginx-svc
@@ -35,16 +35,16 @@ kubectl -n s1 create deployment nginx --image nginx --replicas 3
 # check deployment replica sets
 kubectl get all -n s1
 # Expose dep as a service
-kubectl -n s1  expose deployment.apps/nginx --port 80 --name nginx-svc
+kubectl -n s1  expose deployment.apps/nginx --port 80 --name nginx-svc-cip
 
 #2
 # Displays the full details including endpoints
 kubectl -n s1  describe  svc nginx-svc
 OR
 # Display the details without endpoints
-kubectl get svc nginx-svc # services
+kubectl -n s1 get svc nginx-svc # services
 # get endpoint details
-kubectl get ep # endpoints
+kubectl -n s1 get ep # endpoints
 
 #3
 kubectl -n s1  get svc nginx # get the IP (something like 10.108.93.130)
@@ -81,7 +81,7 @@ kubectl run bus1 $rm --image busybox -i -- wget -O- nginx-svc.s1.svc.cluster.loc
 
 ```bash
 #1
-kubectl -n s1 edit svc nginx
+kubectl -n s1 edit svc nginx-svc
 ```
 
 ```yaml
@@ -115,14 +115,14 @@ In vi write and exit :x
 or
 
 ```bash
-kubectl -n s1 patch svc nginx -p '{"spec":{"type":"NodePort"}}' 
+kubectl -n s1 patch svc svc nginx-svc -p '{"spec":{"type":"NodePort"}}' 
 ```
 
 ```bash
 # 2
-kubectl -n s1 get svc nginx
+kubectl -n s1 get svc svc nginx-svc
 OR
-kubectl -n s1 describe svc nginx
+kubectl -n s1 describe svc svc nginx-svc
 ```
 
 
@@ -141,6 +141,79 @@ kubectl delete deploy nginx # Deletes the pod
 ```
 </p>
 </details>
+
+
+### SVC.2.1 NodePort
+
+1. Drop  Service nginx-svc and create a new one with the same name using NodePort  3000
+2. Hit service using Node's IP.
+
+<details><summary>show</summary>
+<p>
+
+```bash
+#1
+kubectl -n s1 expose deployment.apps/nginx --port 80 --type=NodePort --name nginx-svc -o yaml --dry-run=client > nginx-svc.yaml
+```
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: 2018-06-25T07:55:16Z
+  name: nginx
+  namespace: default
+  resourceVersion: "93442"
+  selfLink: /api/v1/namespaces/default/services/nginx
+  uid: 191e3dac-784d-11e8-86b1-00155d9f663c
+spec:
+  clusterIP: 10.97.242.220
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+    # NOTE you can specify the port below
+    nodePort: 32100
+  selector:
+    run: nginx
+  sessionAffinity: None
+  type: NodePort # change Cluster IP to nodeport
+status:
+  loadBalancer: {}
+```
+
+In vi write and exit :x
+
+or
+
+```bash
+kubectl -n s1 patch svc svc nginx-svc -p '{"spec":{"type":"NodePort"}}' 
+```
+
+```bash
+# 2
+kubectl -n s1 get svc svc nginx-svc
+OR
+kubectl -n s1 describe svc svc nginx-svc
+```
+
+
+```bash
+wget -O- NODE_IP:31931 # if you're using Kubernetes with Docker for Windows/Mac, try 127.0.0.1
+#if you're using minikube, try minikube ip, then get the node ip such as 192.168.99.117
+# from inside microK8s
+curl localhost:32100
+# from outside the cluster
+curl ubu1.vm:32100
+```
+
+```bash
+kubectl delete svc nginx # Deletes the service
+kubectl delete deploy nginx # Deletes the pod
+```
+</p>
+</details>
+
 
 
 ### SVC.3  Service Misconfiguration

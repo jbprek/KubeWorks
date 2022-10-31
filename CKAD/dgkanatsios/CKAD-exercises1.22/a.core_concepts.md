@@ -42,6 +42,8 @@ kubectl create ns dummy
 
 ```bash
 kubectl config set-context --current --namespace=dummy
+OR (without =)
+kubectl config set-context --current --namespace dummy
 kubectl config view | grep namespace
 kubectl config set-context --current --namespace=default
 ```

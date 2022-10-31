@@ -34,14 +34,17 @@ kind create cluster --config=kind-config.yaml
 # delete Cluster
 kind delete clusters kind
 ````
-# Kind 5 Nodeports, 5 Volumes
+
+
+# Kind 5 Nodeports, 5 Volumes, Ingress
 ````bash
-cat << EOF > kind-config-2.yaml 
+cat << EOF > kind-config-55.yaml 
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
 nodes:
 - role: control-plane
   extraPortMappings:
+# 5 Port for Node mapping  
     - containerPort: 30000
       hostPort: 30000
       protocol: TCP
@@ -72,7 +75,75 @@ nodes:
       containerPath: /vol5
 EOF
     
-kind create cluster --config  kind-config-2.yaml 
+kind create cluster --config  kind-config-ingress.yaml 
+# From https://kind.sigs.k8s.io/docs/user/ingress/#ingress-nginx
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
+kubectl wait --namespace ingress-nginx \
+  --for=condition=ready pod \
+  --selector=app.kubernetes.io/component=controller \
+  --timeout=90s
+
+````
+# Kind 5 Nodeports, 5 Volumes, Ingress
+````bash
+cat << EOF > kind-config-ingress.yaml 
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+- role: control-plane
+  kubeadmConfigPatches:
+  - |
+    kind: InitConfiguration
+    nodeRegistration:
+      kubeletExtraArgs:
+        node-labels: "ingress-ready=true"
+  extraPortMappings:
+# 2 Ports for Ingress 
+    - containerPort: 80
+      hostPort: 10080
+      protocol: TCP  
+    - containerPort: 443
+      hostPort: 10443
+      protocol: TCP  
+# 5 Port for Node mapping  
+    - containerPort: 30000
+      hostPort: 30000
+      protocol: TCP
+    - containerPort: 30001
+      hostPort: 30001
+      protocol: TCP
+    - containerPort: 30002
+      hostPort: 30002
+      protocol: TCP
+    - containerPort: 30003
+      hostPort: 30003
+      protocol: TCP
+    - containerPort: 30004
+      hostPort: 30004
+      protocol: TCP
+  extraMounts:
+    - hostPath: /home/john/my-kind/vol0
+      containerPath: /vol0
+    - hostPath: /home/john/my-kind/vol1
+      containerPath: /vol1
+    - hostPath: /home/john/my-kind/vol2
+      containerPath: /vol2
+    - hostPath: /home/john/my-kind/vol3
+      containerPath: /vol3
+    - hostPath: /home/john/my-kind/vol4
+      containerPath: /vol4
+    - hostPath: /home/john/my-kind/vol5
+      containerPath: /vol5
+EOF
+    
+kind create cluster --config  kind-config-ingress.yaml 
+# From https://kind.sigs.k8s.io/docs/user/ingress/#ingress-nginx
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
+kubectl wait --namespace ingress-nginx \
+  --for=condition=ready pod \
+  --selector=app.kubernetes.io/component=controller \
+  --timeout=90s
+
 ````
 
 # Kind Local Registy, 5 Nodeports, 5 Volumes
@@ -80,11 +151,11 @@ kind create cluster --config  kind-config-2.yaml
 #!/bin/sh
 set -o errexit
 
-mkdir -p /home/john/my-kind/vol0
-mkdir -p /home/john/my-kind/vol1
-mkdir -p /home/john/my-kind/vol2
-mkdir -p /home/john/my-kind/vol3
-mkdir -p /home/john/my-kind/vol4
+for i in {1..5}
+do 
+  mkdir -p /home/john/my-kind/vol$i
+done  
+  
 
 # create registry container unless it already exists
 reg_name='kind-registry'
@@ -107,6 +178,7 @@ containerdConfigPatches:
 nodes:
 - role: control-plane
   extraPortMappings:
+    # Five ports for NodePorts
     - containerPort: 30000
       hostPort: 30000
       protocol: TCP
